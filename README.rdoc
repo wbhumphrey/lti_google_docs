@@ -1,3 +1,14 @@
 = LtiGoogleDocs
 
 This project rocks and uses MIT-LICENSE.
+
+Navigate to test/dummy
+
+bundle install
+bundle exec rails s
+
+Your application should launch on http://localhost:3000/
+  This should be a default welcome to rails page
+
+Navigate to http://localhost:3000/lti_google_docs
+  You should see the message "Welcome to the Google Docs LTI tool"
