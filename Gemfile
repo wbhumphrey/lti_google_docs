@@ -14,3 +14,4 @@ gemspec
 # gem 'debugger'
 
 gem 'ims-lti'
+gem 'angularjs-rails'
