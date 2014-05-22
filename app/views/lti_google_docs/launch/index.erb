@@ -1,10 +1,33 @@
-
-Welcome to the Google Doc LTI tool.
-
 <div ng-app='LTI_GOOGLE_DOCS'>
-    <div ng-controller='MainCtrl'>
-        <div ng-repeat="item in items">{{item}}</div>
+    <div class="container"  ng-controller='MainCtrl'>
+        <!-- begin editable content -->
+        
+        <div class="header">
+        	<ul class="nav nav-pills pull-right">
+        		<li><a href ng-click=clicky()>Nav Button</a></li>
+        	</ul>
+        	<h3 class="text-muted"> Google Doc LTI Tool</h3>
+        	<hr>
+        </div>
+        
+        
+        
+        
+        <div class="jumbotron">
+			<h1>Google Doc LTI Tool</h1>
+			<span class="lead">This is the default landing screen</span>
+			<div ng-repeat="item in items">{{item}}</div>
+			<button class=" btn btn-success btn-lg" ng-click="clicky()">Let's Get Started</button>
+        </div>
+        
+        <div class="footer">
+        	<hr>
+        	<p> There Labs - University of Missouri (Copyright 2014)</p>
+        </div>
+        
+        
+        <!-- end editable content -->
     </div>
-    <button class="btn btn-primary"> Click Here</button>
+
 </div>
 
