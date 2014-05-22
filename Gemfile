@@ -15,3 +15,4 @@ gemspec
 
 gem 'ims-lti'
 gem 'angularjs-rails'
+gem 'angular-ui-bootstrap-rails'
