@@ -44,11 +44,11 @@ module LtiGoogleDocs
       elsif !secret
         @tp.lti_msg = "Your consumer didn't use a recognized key."
         # tp.lti_errorlog = "You did it wrong!"
-      elsif !tp.valid_request?(request)
+      elsif !@tp.valid_request?(request)
         @tp.lti_msg = "The OAuth signature was invalid"
-      elsif Time.now.utc.to_i - tp.request_oauth_timestamp.to_i > 60*60
+      elsif Time.now.utc.to_i - @tp.request_oauth_timestamp.to_i > 60*60
         @tp.lti_msg = "Your request is too old."
-      elsif was_nonce_used_in_last_x_minutes?(tp.request_oauth_nonce, 60)
+      elsif was_nonce_used_in_last_x_minutes?(@tp.request_oauth_nonce, 60)
         @tp.lti_msg = "This nonce has already been used"
       end
 
