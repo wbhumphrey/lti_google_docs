@@ -81,8 +81,4 @@ app.controller('MainCtrl', function($scope) {
 
         }
     }
-    
-    //I was having trouble getting this executed via 'onload=' in the include_javascript_tag,
-    //so I explicitly call it here.
-    
 });
