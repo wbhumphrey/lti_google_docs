@@ -12,6 +12,6 @@
 
 //= require jquery
 //= require angular
-//= require bootstrap/button
-//= require angular-ui-bootstrap
+//= require bootstrap
+//= require angular-ui-bootstrap-tpls
 //= require_tree .

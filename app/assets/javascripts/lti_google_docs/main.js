@@ -1,10 +1,12 @@
-var app = angular.module('LTI_GOOGLE_DOCS', []);
+var app = angular.module('LTI_GOOGLE_DOCS', ['ui.bootstrap']);
 
 app.controller('MainCtrl', function($scope) {
     $scope.items = [];
-
+    $scope.authorization_status = "Authorize?";
+    $scope.button_disabled = false;
     $scope.clicky = function() {
         console.log("You clicked the button!");
+        loadGoogleAPI();
     };
     
     
@@ -50,12 +52,23 @@ app.controller('MainCtrl', function($scope) {
                             console.log("SUCCESSFULLY RETRIEVED FILES!");
                             ///because this is likely inside an XHR request and NOT in angularjs,
                             //we need to use $apply
+                            console.log(result);
                             $scope.$apply(function() {
                                 for(var i in result) {
                                     var res = result[i];
+                                    
+                                    if(res.mimeType.search("folder") !== -1) {
+                                        res.title = ("FOLDER - "+res.title);
+                                    } else {
+                                        res.title = ("FILE - "+res.title);
+                                    }
+                                    
                                     console.log(res.title);
-                                    $scope.items.push(res.title);
+                                    $scope.items.push(res);
                                 }
+                                $scope.authorization_status = "Authorized!";
+                                $scope.button_disabled = true;
+                                
                             });
                         }
                     });
@@ -71,5 +84,5 @@ app.controller('MainCtrl', function($scope) {
     
     //I was having trouble getting this executed via 'onload=' in the include_javascript_tag,
     //so I explicitly call it here.
-    loadGoogleAPI();
+    
 });

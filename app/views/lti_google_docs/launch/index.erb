@@ -6,22 +6,26 @@
         
         <div class="header">
         	<ul class="nav nav-pills pull-right">
-        		<li><a href ng-click=clicky()>Nav Button</a></li>
+        		<li><button type="button" class="btn btn-primary" btn-checkbox btn-checkbox-true="1" btn-checkbox-false="0" ng-model="authorized" ng-disabled="button_disabled" ng-click="clicky()">
+                    {{authorization_status}}
+                </button></li>
         	</ul>
         	<h3 class="text-muted"> Google Doc LTI Tool</h3>
         	<hr>
         </div>
-        
-        
-        
-        
+
         <div class="jumbotron">
-			<h1>Google Doc LTI Tool</h1>
+			<h1>Google Doc LTI Tool 
+                
+            </h1>
 			<span class="lead">Top 5 Files from Drive: </span>
-			<ul>
-                <li ng-repeat="item in items">{{item}}</li>
-            </ul>
-			<button class=" btn btn-success btn-lg" ng-click="clicky()">Let's Get Started</button>
+
+            <accordion>
+                <accordion-group ng-repeat="item in items" heading={{item.title}}>
+                    {{item.title}}
+                    asdf
+                </accordion-group>
+            </accordion>
         </div>
         
         <div class="footer">
@@ -32,5 +36,4 @@
         
         <!-- end editable content -->
     </div>
-
 </div>
