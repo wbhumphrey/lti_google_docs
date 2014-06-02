@@ -1,3 +1,5 @@
+<%= javascript_include_tag "https://apis.google.com/js/client.js?" %>
+
 <div ng-app='LTI_GOOGLE_DOCS'>
     <div class="container"  ng-controller='MainCtrl'>
         <!-- begin editable content -->
@@ -15,8 +17,10 @@
         
         <div class="jumbotron">
 			<h1>Google Doc LTI Tool</h1>
-			<span class="lead">This is the default landing screen</span>
-			<div ng-repeat="item in items">{{item}}</div>
+			<span class="lead">Top 5 Files from Drive: </span>
+			<ul>
+                <li ng-repeat="item in items">{{item}}</li>
+            </ul>
 			<button class=" btn btn-success btn-lg" ng-click="clicky()">Let's Get Started</button>
         </div>
         
