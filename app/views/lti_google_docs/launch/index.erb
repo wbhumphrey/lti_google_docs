@@ -22,7 +22,9 @@
 
             <accordion>
                 <accordion-group ng-repeat="item in items" heading={{item.title}}>
-                    {{item.title}}
+                    <iframe src="http://docs.google.com/Doc?&docid="{{item.id}}"&output=embed">
+                    
+                    </iframe>
                 </accordion-group>
             </accordion>
         </div>

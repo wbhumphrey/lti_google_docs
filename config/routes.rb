@@ -9,5 +9,7 @@ LtiGoogleDocs::Engine.routes.draw do
   namespace :register do
     get '', to: :index
     post '', to: :index
+    get 'google', to: :google
+    post 'google', to: :google
   end
 end

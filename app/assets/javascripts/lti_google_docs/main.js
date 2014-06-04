@@ -14,6 +14,7 @@ app.controller('MainCtrl', function($scope) {
     //==== GOOGLE DRIVE LOGIC
     var CLIENT_ID = '558678724881-mnbk8edutlbrkvk7tu0v00cpqucp1j15.apps.googleusercontent.com';
     var SCOPES = 'https://www.googleapis.com/auth/drive';
+    var CLIENT_SECRET = 'E007PYt5yNSaFVwfRjLV2AiB';
     
     var loadGoogleAPI = function() {
         console.log("CLIENT API LOADED!")
@@ -22,7 +23,8 @@ app.controller('MainCtrl', function($scope) {
     
     var goGoogle = function() {
         console.log("GOING GOOGLE!");
-        gapi.auth.authorize({'client_id': CLIENT_ID, 'scope': SCOPES, 'immediate': true}, handleResponse);
+        //gapi.auth.authorize({'client_id': CLIENT_ID, 'scope': SCOPES, 'immediate': true}, handleResponse);
+        gapi.auth.authorize({'client_id': CLIENT_ID, 'scope': SCOPES, 'immediate': false, 'approval_prompt': 'force'}, handleResponse);
     }
     
     var handleResponse = function(result) {
@@ -30,8 +32,23 @@ app.controller('MainCtrl', function($scope) {
             console.log("TRYING AGAIN...");
             gapi.auth.authorize({'client_id': CLIENT_ID, 'scope': SCOPES, 'immediate': false}, handleResponse);
         } else {
+            console.log(result);
             console.log("GOOGLE AUTHORIZATION ACQUIRED!");
 
+            var params = {};
+            params.code = result.code;
+            params.client_id = result.client_id;
+            params.client_secret = CLIENT_SECRET;
+            params.grant_type = 'authorization_code'
+            
+            $.post('register',{
+                'auth_code': result.code
+                
+            }, function(data, status) { 
+                console.log("POST COMPLETED: "+data+" STATUS: "+status);
+            });
+            return; //for now
+            
             //loading API
             var listFilesRequest = gapi.client.load('drive', 'v2', function() {
                 
