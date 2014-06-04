@@ -39,6 +39,8 @@ module LtiGoogleDocs
 
             puts client.authorization.redirect_uri
             
+            
+            client.authorization.fetch_access_token!
             puts "REQUEST SENT!"
             puts client.authorization.inspect
             
