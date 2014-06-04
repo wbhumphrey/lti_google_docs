@@ -16,6 +16,8 @@ module LtiGoogleDocs
             puts "====="
             puts params[:code]
             puts "====="
+        end
+        
         render text: 'meh'
     end
       
