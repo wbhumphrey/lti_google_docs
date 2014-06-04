@@ -29,7 +29,7 @@ module LtiGoogleDocs
 
                 puts "FETCHING ACCESS TOKEN!"
                 client.authorization.fetch_access_token!
-                @token = client.authorization.acces_token
+                @token = client.authorization
             end
         end
         
