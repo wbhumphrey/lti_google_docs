@@ -12,13 +12,28 @@ module LtiGoogleDocs
       
     def google
         puts "ACCESSED!"
+        puts params
         if params[:code]
             puts "====="
             puts params[:code]
             puts "====="
+            if !@token
+                puts "CREATING GOOGLE CLIENT"
+                client = Google::APIClient.new
+                client.authorization.client_id = CLIENT_ID
+                client.authorization.client_secret = CLIENT_SECRET
+                client.authorization.redirect_uri = REDIRECT_URI
+                client.authorization.scope = SCOPES
+                client.authorization.code = params[:code]
+                #client.authorization.grant_type = 'authorization_code'
+
+                puts "FETCHING ACCESS TOKEN!"
+                client.authorization.fetch_access_token!
+                @token = client.authorization.acces_token
+            end
         end
         
-        render text: 'meh'
+        render text: client.authorization.inspect
     end
       
     def index
