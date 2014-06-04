@@ -30,7 +30,7 @@ app.controller('MainCtrl', ['$scope', function($scope) {
     var handleResponse = function(result) {
         if(!result) {
             console.log("TRYING AGAIN...");
-            gapi.auth.authorize({'client_id': CLIENT_ID, 'scope': SCOPES, 'immediate': false}, handleResponse);
+            gapi.auth.authorize({'redirect_id': CLIENT_ID, 'scope': SCOPES, 'immediate': false}, handleResponse);
         } else {
             console.log(result);
             console.log("GOOGLE AUTHORIZATION ACQUIRED!");
