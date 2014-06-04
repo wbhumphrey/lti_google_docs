@@ -11,7 +11,7 @@
 // about supported directives.
 
 //= require jquery
-
+//= require angular
 //= require bootstrap/button
 //= require angular-ui-bootstrap
 //= require_tree .
