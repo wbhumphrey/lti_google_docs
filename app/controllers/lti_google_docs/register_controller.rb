@@ -12,6 +12,10 @@ module LtiGoogleDocs
       
     def google
         puts "ACCESSED!"
+        if params[:code]
+            puts "====="
+            puts params[:code]
+            puts "====="
         render text: 'meh'
     end
       

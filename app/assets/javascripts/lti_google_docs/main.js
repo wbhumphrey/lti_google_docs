@@ -1,6 +1,6 @@
 var app = angular.module('LTI_GOOGLE_DOCS', ['ui.bootstrap']);
 
-app.controller('MainCtrl', function($scope) {
+app.controller('MainCtrl', ['$scope', function($scope) {
     $scope.items = [];
     $scope.authorization_status = "Authorize?";
     $scope.button_disabled = false;
@@ -98,4 +98,4 @@ app.controller('MainCtrl', function($scope) {
 
         }
     }
-});
+}]);
