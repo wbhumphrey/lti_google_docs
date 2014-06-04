@@ -15,7 +15,7 @@ app.controller('MainCtrl', ['$scope', function($scope) {
     var CLIENT_ID = '558678724881-mnbk8edutlbrkvk7tu0v00cpqucp1j15.apps.googleusercontent.com';
     var SCOPES = 'https://www.googleapis.com/auth/drive';
     var CLIENT_SECRET = 'E007PYt5yNSaFVwfRjLV2AiB';
-    
+    var REDIRECT_URI = "http://desolate-reef-8522.herokuapp.com/lti_google_docs/register/google";
     var loadGoogleAPI = function() {
         console.log("CLIENT API LOADED!")
        window.setTimeout(goGoogle, 100); //needed for some strange reason
@@ -24,7 +24,7 @@ app.controller('MainCtrl', ['$scope', function($scope) {
     var goGoogle = function() {
         console.log("GOING GOOGLE!");
         //gapi.auth.authorize({'client_id': CLIENT_ID, 'scope': SCOPES, 'immediate': true}, handleResponse);
-        gapi.auth.authorize({'client_id': CLIENT_ID, 'scope': SCOPES, 'immediate': false, 'approval_prompt': 'force', 'response_type': 'code'}, handleResponse);
+        gapi.auth.authorize({'redirect_uri': REDIRECT_URI, client_id': CLIENT_ID, 'scope': SCOPES, 'immediate': false, 'approval_prompt': 'force', 'response_type': 'code'}, handleResponse);
     }
     
     var handleResponse = function(result) {
