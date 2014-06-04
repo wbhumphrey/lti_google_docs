@@ -3,7 +3,7 @@ PATH
   specs:
     lti_google_docs (0.0.1)
       ims-lti (~> 1.1.4)
-      rails (~> 4.0.4)
+      rails (~> 4.1.1)
 
 GEM
   remote: https://rubygems.org/
