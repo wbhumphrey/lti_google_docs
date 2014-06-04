@@ -25,6 +25,7 @@ module LtiGoogleDocs
                 client.authorization.redirect_uri = REDIRECT_URI
                 client.authorization.scope = SCOPES
                 client.authorization.code = params[:code]
+                client.authorization.access_type = 'offline'
                 #client.authorization.grant_type = 'authorization_code'
 
                 puts "FETCHING ACCESS TOKEN!"
