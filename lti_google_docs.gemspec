@@ -7,11 +7,11 @@ require "lti_google_docs/version"
 Gem::Specification.new do |s|
   s.name        = "lti_google_docs"
   s.version     = LtiGoogleDocs::VERSION
-  s.authors     = ["TODO: Your name"]
-  s.email       = ["TODO: Your email"]
-  s.homepage    = "TODO"
-  s.summary     = "TODO: Summary of LtiGoogleDocs."
-  s.description = "TODO: Description of LtiGoogleDocs."
+  s.authors     = ["University of Missouri"]
+  s.email       = ["babiuchr@missouri.edu"]
+  s.homepage    = "http://www.missouri.edu"
+  s.summary     = "Google Drive Integration into Canvas."
+  s.description = "Rails Engine serving as an LTI for Canvas"
 
   s.files = Dir["{app,config,db,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.rdoc"]
   s.test_files = Dir["test/**/*"]
