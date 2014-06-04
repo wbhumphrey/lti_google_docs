@@ -24,7 +24,7 @@ app.controller('MainCtrl', ['$scope', function($scope) {
     var goGoogle = function() {
         console.log("GOING GOOGLE!");
         //gapi.auth.authorize({'client_id': CLIENT_ID, 'scope': SCOPES, 'immediate': true}, handleResponse);
-        gapi.auth.authorize({'client_id': CLIENT_ID, 'scope': SCOPES, 'immediate': false, 'approval_prompt': 'force'}, handleResponse);
+        gapi.auth.authorize({'client_id': CLIENT_ID, 'scope': SCOPES, 'immediate': false, 'approval_prompt': 'force', 'response_type': 'code'}, handleResponse);
     }
     
     var handleResponse = function(result) {
