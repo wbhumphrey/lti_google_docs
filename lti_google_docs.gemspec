@@ -18,6 +18,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency "rails", "~> 4.1.1"
   s.add_dependency "ims-lti", "~> 1.1.4"
+  s.add_dependency "angularjs-rails"
 
   s.add_development_dependency "sqlite3"
 end
