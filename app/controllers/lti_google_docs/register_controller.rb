@@ -6,7 +6,7 @@ module LtiGoogleDocs
   class RegisterController < ApplicationController
     CLIENT_ID = "558678724881-mnbk8edutlbrkvk7tu0v00cpqucp1j15.apps.googleusercontent.com"
     CLIENT_SECRET = "E007PYt5yNSaFVwfRjLV2AiB"
-    REDIRECT_URI = "http://mu-170127.dhcp.missouri.edu:31337/lti_google_docs/register/google"
+    REDIRECT_URI = "http://desolate-reef-8522.herokuapp.com/lti_google_docs/register/google"
     #REDIRECT_URI = "https://developers.google.com/oauthplayground1"
     SCOPES = ['https://www.googleapis.com/auth/drive']
       
