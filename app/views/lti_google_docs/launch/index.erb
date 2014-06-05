@@ -1,15 +1,37 @@
 <%= javascript_include_tag "https://apis.google.com/js/client.js?" %>
 
+<%= javascript_tag do %>
+    //==== GOOGLE DRIVE LOGIC
+    var CLIENT_ID = '558678724881-mnbk8edutlbrkvk7tu0v00cpqucp1j15.apps.googleusercontent.com';
+    var SCOPES = 'https://www.googleapis.com/auth/drive';
+    var CLIENT_SECRET = 'E007PYt5yNSaFVwfRjLV2AiB';
+    var REDIRECT_URI = "http://desolate-reef-8522.herokuapp.com/lti_google_docs/register/google";
+    REDIRECT_URI = "http://127.0.0.1:31337/lti_google_docs/register/google"
+    var loadGoogleAPI = function() {
+        console.log("CLIENT API LOADED!")
+       window.setTimeout(goGoogle, 100); //needed for some strange reason
+    };
+    
+    var goGoogle = function() {
+        console.log("GOING GOOGLE!");
+        gapi.auth.authorize({'redirect_uri': REDIRECT_URI,
+                             'client_id': CLIENT_ID,
+                             'scope': SCOPES,
+                             'immediate': false,
+                             'approval_prompt': 'force',
+                             'response_type': 'code',
+                             'access_type': 'offline'});
+    };
+
+    //actually start the auth process.
+    loadGoogleAPI();
+<% end %>
+
 <div ng-app='LTI_GOOGLE_DOCS'>
     <div class="container"  ng-controller='MainCtrl'>
         <!-- begin editable content -->
         
         <div class="header">
-        	<ul class="nav nav-pills pull-right">
-        		<li><button type="button" class="btn btn-primary" btn-checkbox btn-checkbox-true="1" btn-checkbox-false="0" ng-model="authorized" ng-disabled="button_disabled" ng-click="clicky()">
-                    {{authorization_status}}
-                </button></li>
-        	</ul>
         	<h3 class="text-muted"> Google Doc LTI Tool</h3>
         	<hr>
         </div>
@@ -22,9 +44,7 @@
 
             <accordion>
                 <accordion-group ng-repeat="item in items" heading={{item.title}}>
-                    <iframe src="http://docs.google.com/Doc?&docid="{{item.id}}"&output=embed">
-                    
-                    </iframe>
+                    {{item.title}}
                 </accordion-group>
             </accordion>
         </div>
@@ -33,7 +53,7 @@
         	<hr>
         	<p> There Labs - University of Missouri (Copyright 2014)</p>
         </div>
-        
+    
         
         <!-- end editable content -->
     </div>

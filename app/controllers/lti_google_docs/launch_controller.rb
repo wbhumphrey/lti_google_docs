@@ -6,11 +6,16 @@ module LtiGoogleDocs
         
         #get user id
         
-        #check for refresh token mapping from user id
-        
-        #use refresh token to get auth token from google
-        
-        #Authorize?
+        #check for access token mapping from user id
+         #if no access token,
+            #check for refresh token mapping from user id
+             #if no refresh token,
+                #load unauthenticated view with automatic token retrieval 
+             #else
+                #retrieve access token via refresh token
+                #load authenticated view
+         #else 
+            #load authenticated view
         
         #render
         

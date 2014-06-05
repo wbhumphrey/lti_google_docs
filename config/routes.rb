@@ -11,5 +11,6 @@ LtiGoogleDocs::Engine.routes.draw do
     post '', to: :index
     get 'google', to: :google
     post 'google', to: :google
+    get 'confirmed', to: :confirmed
   end
 end
