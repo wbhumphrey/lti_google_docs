@@ -1,30 +1,7 @@
 <%= javascript_include_tag "https://apis.google.com/js/client.js?" %>
 
 <%= javascript_tag do %>
-    //==== GOOGLE DRIVE LOGIC
-    var CLIENT_ID = '558678724881-mnbk8edutlbrkvk7tu0v00cpqucp1j15.apps.googleusercontent.com';
-    var SCOPES = 'https://www.googleapis.com/auth/drive';
-    var CLIENT_SECRET = 'E007PYt5yNSaFVwfRjLV2AiB';
-    var REDIRECT_URI = "http://desolate-reef-8522.herokuapp.com/lti_google_docs/register/google";
-    REDIRECT_URI = "http://127.0.0.1:31337/lti_google_docs/register/google"
-    var loadGoogleAPI = function() {
-        console.log("CLIENT API LOADED!")
-       window.setTimeout(goGoogle, 100); //needed for some strange reason
-    };
-    
-    var goGoogle = function() {
-        console.log("GOING GOOGLE!");
-        gapi.auth.authorize({'redirect_uri': REDIRECT_URI,
-                             'client_id': CLIENT_ID,
-                             'scope': SCOPES,
-                             'immediate': false,
-                             'approval_prompt': 'force',
-                             'response_type': 'code',
-                             'access_type': 'offline'});
-    };
-
-    //actually start the auth process.
-    loadGoogleAPI();
+    window.open('launch/auth', 'LTI Authentication', "height=400, width=400")
 <% end %>
 
 <div ng-app='LTI_GOOGLE_DOCS'>

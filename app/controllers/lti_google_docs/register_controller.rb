@@ -29,6 +29,10 @@ module LtiGoogleDocs
         # We redirect to a page that automatically closes itself
         # since this is redirected to a popup.
         redirect_to "/lti_google_docs/register/confirmed"
-    end  
+    end
+      
+    def index
+    end
+      
   end
 end

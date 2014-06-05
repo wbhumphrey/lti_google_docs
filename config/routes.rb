@@ -3,7 +3,7 @@ LtiGoogleDocs::Engine.routes.draw do
   namespace :launch do
     get '', to: :index
     post '', to: :index
-    get 'register', to: 'register#index'
+    get 'auth', to: :auth
   end
 
   namespace :register do
