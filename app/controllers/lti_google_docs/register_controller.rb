@@ -35,7 +35,7 @@ module LtiGoogleDocs
             end
         end
         
-        render text: @token.inspect
+        render json: @token.to_json
     end
       
     def index
@@ -137,7 +137,7 @@ module LtiGoogleDocs
       client.authorization.code = authorization_code
       client.authorization.redirect_uri = REDIRECT_URI
       client.authorization.grant_type = 'authorization_code'
-      client.authorization.additional_parameters ={:access_type => :offline}
+      #client.authorization.additional_parameters ={:access_type => :offline}
       begin
         client.authorization.fetch_access_token!
         return client.authorization
