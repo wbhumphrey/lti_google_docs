@@ -136,7 +136,7 @@ module LtiGoogleDocs
       client.authorization.client_secret = CLIENT_SECRET
       client.authorization.code = authorization_code
       client.authorization.redirect_uri = REDIRECT_URI
-
+      client.authorization.grant_type = 'authorization_code'
       begin
         client.authorization.fetch_access_token!
         return client.authorization
