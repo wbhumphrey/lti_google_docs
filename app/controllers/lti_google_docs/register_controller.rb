@@ -18,20 +18,16 @@ module LtiGoogleDocs
             puts params[:code]
             puts "====="
             if !@token
-#                puts "CREATING GOOGLE CLIENT"
-#                client = Google::APIClient.new
-#                client.authorization.client_id = CLIENT_ID
-#                client.authorization.client_secret = CLIENT_SECRET
-#                client.authorization.redirect_uri = REDIRECT_URI
-#                client.authorization.scope = SCOPES
-#                client.authorization.code = params[:code]
-##                client.authorization.access_type = 'offline'
-#                client.authorization.grant_type = 'authorization_code'
-#
-#                puts client.authorization.authorization_uri
-#                puts "FETCHING ACCESS TOKEN!"
-#                client.authorization.fetch_access_token!
-                @token = exchange_code(params[:code])
+                =
+              client = Google::APIClient.new
+              client.authorization.client_id = CLIENT_ID
+              client.authorization.client_secret = CLIENT_SECRET
+              client.authorization.code = authorization_code
+              client.authorization.redirect_uri = REDIRECT_URI
+              client.authorization.grant_type = 'refresh_token'
+              #client.authorization.additional_parameters ={:access_type => :offline}
+                client.authorization.fetch_access_token!
+                @token = client.authorization
             end
         end
         
