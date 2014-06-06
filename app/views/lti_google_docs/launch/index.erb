@@ -1,12 +1,22 @@
 <%= javascript_include_tag "https://apis.google.com/js/client.js?" %>
 
-<%= javascript_tag do %>
-    window.open('launch/auth', 'LTI Authentication', "height=400, width=400")
-<% end %>
 
 <div ng-app='LTI_GOOGLE_DOCS'>
-    <div class="container"  ng-controller='MainCtrl'>
+    <div id='google-lti-body' class="container"  ng-controller='MainCtrl'>
         <!-- begin editable content -->
+        <%= javascript_tag do %>
+            var handleLoad = function($scope) {
+            <% if !@access_token %>
+                window.open('launch/auth', 'LTI Authentication', "height=400, width=400")
+                window.success_auth = $scope.successfulAuthentication;
+            <% else %>
+                $scope.successfulAuthentication();
+            <% end %>
+            }
+        <% end %>
+        
+        
+        
         
         <div class="header">
         	<h3 class="text-muted"> Google Doc LTI Tool</h3>

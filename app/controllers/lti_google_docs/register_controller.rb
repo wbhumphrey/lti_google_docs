@@ -11,9 +11,14 @@ module LtiGoogleDocs
     SCOPES = ['https://www.googleapis.com/auth/drive']
       
     def confirmed
+        puts "CONFIRMING!!!"
+        puts params
     end
       
     def google
+        puts "GOOGLING!!!"
+        puts params
+        
         client = Google::APIClient.new
         client.authorization.client_id = CLIENT_ID
         client.authorization.client_secret = CLIENT_SECRET
@@ -25,6 +30,15 @@ module LtiGoogleDocs
         
         puts "REFRESH TOKEN: #{client.authorization.refresh_token}"
         puts "ACCESS TOKEN: #{client.authorization.access_token}"
+        puts "USER ID: #{session[:userid]}"
+      
+        if User.find_by(userid: session[:userid])
+            puts "FOUND EXISTING USER, UPDATING ENTRY"
+            User.find_by(userid: session[:userid]).update_attributes(:refresh => client.authorization.refresh_token)
+        else    
+            puts "NO EXISTING USER FOUND, CREATING ENTRY"
+            User.create(userid: session[:userid], refresh: client.authorization.refresh_token);
+        end
 
         # We redirect to a page that automatically closes itself
         # since this is redirected to a popup.
