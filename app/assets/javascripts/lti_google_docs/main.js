@@ -20,9 +20,16 @@ var c = app.controller('MainCtrl', ['$scope', '$http', function($scope, $http) {
                 }
                 
                 console.log("TODO: calling canvas api next");
-
+                $http({method: 'GET', url: "/api/v1/courses/1234/users"})
+                    .success(function(data, status, headers, config) {
+                        console.log("SUCCESSFUL RETRIEVAL OF USERS FOR COURSE")
+                    }).error(function(data, status, headers, config) {
+                        console.log(data);
+                        console.log(status);
+                        console.log("ERROR RETRIEVING USERS FOR COURSE");
+                });
             }).error(function(data, status, headers, config) {
-                console.log("ERROR!");
+                console.log("ERROR RETRIEVING FILES FROM DRIVE");
         });
         
         //start making calls to rails controller

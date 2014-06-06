@@ -13,5 +13,7 @@ LtiGoogleDocs::Engine.routes.draw do
     get 'google', to: :google
     post 'google', to: :google
     get 'confirmed', to: :confirmed
+    get 'canvas', to: :canvas
+    get 'confirmed2', to: :confirmed2
   end
 end
