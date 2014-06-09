@@ -16,25 +16,26 @@
         <% end %>
         
         
-        
-        
-        <div class="header">
-        	<h3 class="text-muted"> Google Doc LTI Tool</h3>
-        	<hr>
-        </div>
 
-        <div class="jumbotron">
-			<h1>Google Doc LTI Tool 
-                
-            </h1>
-			<span class="lead">Top 5 Files from Drive: </span>
-
+            
+            <tabset>
+                <tab heading="Start Here">
+                    Start here.
+                </tab>
+                <tab ng-repeat="item in items" heading="{{item.title}}">
+                    <iframe id='frame-{{item.id}}' width="100%" height="100%" style="resize: both; overflow: auto"></iframe>
+                </tab>
+            </tabset>
+<!--
             <accordion>
                 <accordion-group ng-repeat="item in items" heading={{item.title}}>
                     {{item.title}}
+                    <br/>
+                    <iframe id='frame-{{item.id}}' style="width: 100%; height: 100%">{{item.embed}}</iframe>
                 </accordion-group>
             </accordion>
-        </div>
+-->
+<!--        </div>-->
         
         <div class="footer">
         	<hr>

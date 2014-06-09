@@ -2,7 +2,6 @@ var app = angular.module('LTI_GOOGLE_DOCS', ['ui.bootstrap']);
 
 var c = app.controller('MainCtrl', ['$scope', '$http', function($scope, $http) {
     $scope.items = [];
-
     
     $scope.goCrazy = function() {
         console.log("GOING CRAZY!");  
@@ -13,29 +12,26 @@ var c = app.controller('MainCtrl', ['$scope', '$http', function($scope, $http) {
         
         $http({ method: 'GET', url: 'launch/hello'})
             .success(function(data, status, headers, config) {
-                console.log(data);
-                for(var i in data) {
-                    var d = data[i];
-                    $scope.items.push({'title': d.title});
-                }
+                var d = data[0];
+                var item = {'title': d.title,
+                            'id': d.id,
+                            'url': 'https://docs.google.com/document/d/'+d.id+'/pub?embedded=true',
+                            'embed': 'https://docs.google.com/document/d/'+d.id+'/edit?embedded=true'};
+                $scope.items.push(item);
+                
+                window.setTimeout(function() {
+                    for(var i in $scope.items) {
+                        var _item = $scope.items[i];
+                        console.log("LOOKING FOR FRAME: frame-"+_item.id);
+                        document.getElementById('frame-'+_item.id).src = _item.embed;
+                    }
+                    
+                }, 1000);
                 
                 console.log("TODO: calling canvas api next");
-                $http({method: 'GET', url: "/api/v1/courses/1234/users"})
-                    .success(function(data, status, headers, config) {
-                        console.log("SUCCESSFUL RETRIEVAL OF USERS FOR COURSE")
-                    }).error(function(data, status, headers, config) {
-                        console.log(data);
-                        console.log(status);
-                        console.log("ERROR RETRIEVING USERS FOR COURSE");
-                });
             }).error(function(data, status, headers, config) {
                 console.log("ERROR RETRIEVING FILES FROM DRIVE");
         });
-        
-        //start making calls to rails controller
-//        $scope.$apply(function() { 
-//            $scope.items.push({'title': 'one'}); 
-//        });
     };
     handleLoad($scope);
 }]);
