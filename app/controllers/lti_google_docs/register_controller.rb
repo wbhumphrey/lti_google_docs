@@ -77,6 +77,13 @@ module LtiGoogleDocs
         puts "ACCESS TOKEN: #{client.access_token}"
         
         puts client.list_courses
+        
+        #puts "================"
+        
+        # THE BELOW COMMAND IS VERIFIED TO WORK
+        #client.add_tool_to_course(1, "Test Tool", CANVAS_REDIRECT_URI)
+        
+        
         render text: "ok"
 #        puts params
 #        if !params[:access_token]
@@ -114,6 +121,7 @@ module LtiGoogleDocs
     
     def index
     end
+
       
   end
 
@@ -172,6 +180,26 @@ module LtiGoogleDocs
         uri = URI.parse("#{@canvas_url}/api/v1/courses?access_token=#{@access_token}")
         response = Net::HTTP.get_response(uri)
         JSON.parse(response.body)
+    end
+      
+    def add_tool_to_course(course, tool_name, tool_url)
+        uri = URI.parse("#{@canvas_url}/api/v1/courses/#{course}/external_tools")
+        http = Net::HTTP.new(uri.host, uri.port)
+        request = Net::HTTP::Post.new(uri.request_uri)
+
+        request["Authorization"] = "Bearer #{@access_token}"
+        
+        puts request["Authorization"]
+        
+        request.set_form_data({"name"=>tool_name, "consumer_key"=>"test", "shared_secret"=>"secret", "url"=>tool_url,"privacy_level"=>"public"})
+        
+        response = http.request(request);
+      
+      
+#        response = Net::HTTP.post_form(uri, {"access_token"=>"#{@access_token}","name"=>tool_name, "consumer_key"=>"test", "shared_secret"=>"secret", "url"=>tool_url,"privacy_level"=>"public"});
+
+        puts "ADDED TOOL"
+        puts response.body
     end
   end
 end

@@ -89,6 +89,9 @@ module LtiGoogleDocs
                 puts "RESULTS: #{result.inspect}"
         else
             puts "DIDN'T WORK SO REFRESHING ACCESS TOKEN"
+            puts "LOOKING FOR USER WITH ID: #{session[:userid]}"
+            
+            
             refreshToken = User.find_by(userid: session[:userid]).refresh
             accessToken = retrieve_access_token(refreshToken)
             puts "RETRIEVED TOKEN: #{accessToken} ... PUTTING IN SESSION"
@@ -139,6 +142,14 @@ module LtiGoogleDocs
         client.authorization.fetch_access_token!
         
         client.authorization.access_token
+    end
+        
+        
+    def factory
+    end
+        
+    def files
+        hello
     end
   end
 end

@@ -5,6 +5,8 @@ LtiGoogleDocs::Engine.routes.draw do
     post '', to: :index
     get 'auth', to: :auth
     get 'hello', to: :hello
+    get 'factory', to: :factory
+    get 'files', to: :files
   end
 
   namespace :register do
@@ -16,4 +18,6 @@ LtiGoogleDocs::Engine.routes.draw do
     get 'canvas', to: :canvas
     get 'confirmed2', to: :confirmed2
   end
+
+  resources :labs
 end
