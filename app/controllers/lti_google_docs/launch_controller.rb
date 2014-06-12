@@ -1,15 +1,24 @@
 require_dependency "lti_google_docs/application_controller"
+require_dependency "lti_google_docs/labs_controller"
+
+require 'google/api_client'
 
 module LtiGoogleDocs
   class LaunchController < ApplicationController
-    CLIENT_ID = "558678724881-mnbk8edutlbrkvk7tu0v00cpqucp1j15.apps.googleusercontent.com"
-    CLIENT_SECRET = "E007PYt5yNSaFVwfRjLV2AiB"
-    REDIRECT_URI = "http://desolate-reef-8522.herokuapp.com/lti_google_docs/register/google"
-    REDIRECT_URI = "http://127.0.0.1:31337/lti_google_docs/register/google"
-    SCOPES = ['https://www.googleapis.com/auth/drive']
-        
+
+      def initialize
+        obj = LtiGoogleDocs::Configuration.new
+        @@CLIENT_ID = obj.client_id
+        @@CLIENT_SECRET = obj.client_secret
+        @@REDIRECT_URI = obj.redirect_uri
+        @@SCOPES = obj.scopes
+      end
+      
     #The initial loading point for our LTI
     def index
+        puts "INSIDE INDEX!"
+        
+        
         #check for Google Access Token in session
         session[:userid] = params[:user_id]
          if is_access_token_valid?
@@ -71,10 +80,10 @@ module LtiGoogleDocs
         
         puts "TOKEN: #{session[:google_access_token]}"
         client = Google::APIClient.new
-        client.authorization.client_id = CLIENT_ID
-        client.authorization.client_secret = CLIENT_SECRET
+        client.authorization.client_id = @@CLIENT_ID
+        client.authorization.client_secret = @@CLIENT_SECRET
         client.authorization.access_token = session[:google_access_token]
-        client.authorization.scope = SCOPES[0]
+        client.authorization.scope = @@SCOPES[0]
         drive = client.discovered_api('drive', 'v2')
         api_result = client.execute(
             :api_method => drive.files.list,
@@ -83,10 +92,8 @@ module LtiGoogleDocs
         #puts api_result.inspect
         result = Array.new
         if api_result.status == 200
-                files = api_result.data
-                
-                result.concat(files.items)
-                puts "RESULTS: #{result.inspect}"
+            files = api_result.data    
+            result.concat(files.items)
         else
             puts "DIDN'T WORK SO REFRESHING ACCESS TOKEN"
             puts "LOOKING FOR USER WITH ID: #{session[:userid]}"
@@ -115,10 +122,10 @@ module LtiGoogleDocs
         if !session[:google_access_token] then return false end
     
         client = Google::APIClient.new
-        client.authorization.client_id = CLIENT_ID
-        client.authorization.client_secret = CLIENT_SECRET
+        client.authorization.client_id = @@CLIENT_ID
+        client.authorization.client_secret = @@CLIENT_SECRET
         client.authorization.access_token = session[:google_access_token]
-        client.authorization.scope = SCOPES[0]
+        client.authorization.scope = @@SCOPES[0]
         drive = client.discovered_api('drive', 'v2')
         api_result = client.execute(
             :api_method => drive.files.list,
@@ -133,8 +140,8 @@ module LtiGoogleDocs
 
     def retrieve_access_token(refresh_token)
         client = Google::APIClient.new
-        client.authorization.client_id = CLIENT_ID
-        client.authorization.client_secret = CLIENT_SECRET
+        client.authorization.client_id = @@CLIENT_ID
+        client.authorization.client_secret = @@CLIENT_SECRET
         client.authorization.refresh_token = refresh_token
         
         client.authorization.grant_type = 'refresh_token'

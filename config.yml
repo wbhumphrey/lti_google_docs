@@ -1,0 +1,10 @@
+Google_Credentials:
+    client_id: "558678724881-mnbk8edutlbrkvk7tu0v00cpqucp1j15.apps.googleusercontent.com"
+    client_secret: "E007PYt5yNSaFVwfRjLV2AiB"
+    redirect_uri: "http://127.0.0.1:31337/lti_google_docs/register/google"
+    scopes: 'https://www.googleapis.com/auth/drive'
+
+object:
+    one: '1'
+    two: '2'
+    three: '3'

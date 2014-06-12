@@ -19,5 +19,13 @@ LtiGoogleDocs::Engine.routes.draw do
     get 'confirmed2', to: :confirmed2
   end
 
-  resources :labs
+  namespace :labs do
+    get '', to: :index
+    post '', to: :start
+    post 'new', to: :create
+    get 'all', to: :all
+    delete ':id', to: :remove
+  end
+#  resources :labs
+#  post 'labs', to: 'labs#crazy'
 end

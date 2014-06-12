@@ -11,7 +11,16 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140605202131) do
+ActiveRecord::Schema.define(version: 20140611174643) do
+
+  create_table "labs", force: true do |t|
+    t.string   "title"
+    t.string   "folderName"
+    t.string   "folderId"
+    t.string   "participation"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "lti_google_docs_canvas_google_user_bridges", force: true do |t|
     t.string   "userid"

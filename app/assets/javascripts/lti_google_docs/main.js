@@ -39,18 +39,34 @@ var c = app.controller('MainCtrl', ['$scope', '$http', function($scope, $http) {
 app.controller('FactoryCtrl', ['$scope', '$http', '$modal', function($scope, $http, $modal) {
     
     $scope.nothing = "no text";
+    $scope.asdfxxx = "no-lab";
+    
+    $scope.form = {};
+    
     $scope.createLab = function() {
-      console.log("CREATING LAB WITH TITLE: "+$scope.labName+ " TEMPLATE: "+$scope.templateFolderName+" WITH ID: "+$scope.templateID+" AND PARTICIPATION: "+$scope.participationModel);
+      console.log("CREATING LAB WITH TITLE: "+$scope.form.labName+ " TEMPLATE: "+$scope.form.templateFolderName+" WITH ID: "+$scope.form.templateID+" AND PARTICIPATION: "+$scope.form.participationModel);
         
+        console.log($scope);
         var data = {
-            title: $scope.labName,
-            folderName: $scope.templateFolderName,
-            folderId: $scope.templateID,
-            participation: $scope.participationModel
+            title: $scope.form.labName,
+            folderName: $scope.form.templateFolderName,
+            folderId: $scope.form.templateID,
+            participation: $scope.form.participationModel
         };
         
-        $http.post('labs', JSON.stringify(data)).success(function(data, status, headers, config) {
+        $http.post('labs/new', JSON.stringify(data)).success(function(data, status, headers, config) {
             console.log("SUCCESSFUL CREATION!");
+            console.log("RETRIEVING NEW LIST OF LABS!");
+            $http.get('labs/all')
+                .success(function(data, status, headers, config) {
+                    
+                    $scope.form.labs = [];
+                    $scope.form.labs = data;
+                }).error(function(data, status, headers, config) { 
+                    console.log("ERROR RE-RETRIEVING LABS!");
+            });
+            
+            
         }).error(function(data, status, headers, config) {
             console.log("ERROR!");
             console.log(data);
@@ -61,37 +77,15 @@ app.controller('FactoryCtrl', ['$scope', '$http', '$modal', function($scope, $ht
     $scope.selectFolderFromDrive = function() {
       console.log("SELECTING!");  
         
-        var FilePickerCtrl = function($scope, $modalInstance) {
-            $scope.itemsToChooseFrom = [];
-            $scope.titlesToIDs = {};
-            
-            $http({method: 'GET', url: 'launch/files'}).success(function(data, status, headers, config) {
-                console.log("SUCCEEDED!")
-//                console.log(data);
-                for(var i in data) {
-                    var file = data[i];
-//                    console.log(file.title);
-//                    console.log(file);
-                    if(file.mimeType.indexOf('folder') != -1) {
-                        $scope.itemsToChooseFrom.push(file.title);
-                        $scope.titlesToIDs[file.title] = file.id;
-                    }
-                }
-                
-                
-            }).error(function(data, status, headers, config) {
-                console.log("ERROR!");
-                console.log(data);
-                console.log(status);
-                
-            });
+        var FilePickerCtrl = function($scope, $modalInstance, itemsToChooseFrom, titlesToIDs) {
             //defer to rails to retrieve list of files.
-            
             $scope.input = {
                 fileid: '',
                 title: '',
                 selected: ''
             };
+            $scope.itemsToChooseFrom = itemsToChooseFrom;
+            $scope.titlesToIDs = titlesToIDs;
             
             $scope.ok = function() {
                 console.log("USER SELECTED: "+ $scope.input.selected);
@@ -109,19 +103,73 @@ app.controller('FactoryCtrl', ['$scope', '$http', '$modal', function($scope, $ht
         
         var modalInstance = $modal.open({
             templateUrl: 'FileChooser.html',
-            controller: FilePickerCtrl
+            controller: FilePickerCtrl,
+            resolve: {
+                itemsToChooseFrom: function() { return $scope.itemsToChooseFrom; },
+                titlesToIDs: function() { return $scope.titlesToIDs; }
+            }
         });
         modalInstance.result.then(function (input) {
             //success
             console.log("USER CHOSE: "+input.selected+" WITH ID: "+input.id);
-            $scope.templateFolderName = input.selected;
-            $scope.templateID = input.id;
+            $scope.form.templateFolderName = input.selected;
+            $scope.form.templateID = input.id;
             
         }, function() {
             
             //dismissed
         });
     };
+    $scope.labs = [];
     
+    $scope.itemsToChooseFrom = [];
+    $scope.titlesToIDs = {};
+    
+    //silently retrieve list of folders on google drive
+    $http({method: 'GET', url: 'launch/files'})
+        .success(function(data, status, headers, config) {
+            console.log("SUCCEEDED!")
+            for(var i in data) {
+                var file = data[i];
+
+                if(file.mimeType.indexOf('folder') != -1) {
+                    $scope.itemsToChooseFrom.push(file.title);
+                    $scope.titlesToIDs[file.title] = file.id;
+                }
+            }
+        }).error(function(data, status, headers, config) {
+                console.log("ERROR!");
+                console.log(data);
+                console.log(status);
+                
+    });
+    
+    //retrieve labs
+    $http.get('labs/all')
+        .success(function(data, status, headers, config) {
+            console.log("GOT LABS: ");
+            console.log(data);
+            $scope.form.labs = data;
+        }).error(function(data, status, headers, config) { 
+            console.log("ERROR!");
+    });
+    
+    $scope.deleteLab = function(id) {
+        console.log("YOU WANT TO DELETE LAB: "+id);
+        $http.delete('labs/'+id)
+        .success(function(data, status, headers, config) {
+            console.log("SUCCESS "+data);
+            $http.get('labs/all')
+                .success(function(data, status, headers, config) {
+                    $scope.form.labs = data;
+                    
+                }).error(function(data, status, headers, config) {
+                    console.log("ERROR RETRIEVING LABS AFTER DELETION");
+            });
+            
+        }).error(function(data, status, headers, config) {
+            console.log("ERROR IN DELETE!");
+        });
+    }
     
 }]);

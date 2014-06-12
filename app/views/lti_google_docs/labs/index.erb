@@ -1,0 +1,106 @@
+<%= javascript_include_tag "https://apis.google.com/js/client.js?" %>
+
+
+<div ng-app='LTI_GOOGLE_DOCS'>
+    <div id='google-lti-body' class="container"  ng-controller='FactoryCtrl'>
+        <!-- begin editable content -->
+        <%= javascript_tag do %>
+            var handleLoad = function($scope) {
+            <% if !@access_token %>
+                window.open('launch/auth', 'LTI Authentication', "height=400, width=400")
+                window.success_auth = $scope.successfulAuthentication;
+            <% else %>
+                $scope.successfulAuthentication();
+            <% end %>
+            }
+        <% end %>
+            <tabset>
+                <tab heading="Create!">
+                    <div class="jumbotron">
+                        <h3>Lab Creator</h3><br/>
+                        <div class="form-group row">
+                            <div class="col-lg-5">
+                                <label for="lab-name" class>Lab Title</label>
+                            </div>
+                            <div class="col-lg-5">
+                                <input type="text" class="form-control" id="lab-name" placeholder="Newtonian Physics 2" ng-model=form.labName>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <div class="col-lg-5">
+                                <label for="lab-template">Template Folder on Google Drive</label>
+                            </div>
+                            <div class="col-lg-5">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="lab-template" ng-model="form.templateFolderName">
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default" type="button" ng-click="selectFolderFromDrive()">Choose!</button>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-5">
+                                <label>Choose Individual or Group Participation</label>
+                            </div>
+                            <div class="col-lg-5">
+                                <div class="btn-group">
+                                    <label class="btn btn-primary" ng-model="form.participationModel" btn-radio="'Individual'">Individual</label>
+                                    <label class="btn btn-primary" ng-model="form.participationModel" btn-radio="'Group'">Group</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn btn-lg btn-success pull-right" ng-click="createLab()">Create Lab!</button>
+                    </div>
+                </tab>
+                <tab heading="See All!">
+                    
+                    <div class="jumbotron" ng-show="form.labs.length < 1">
+                        There doesn't appear to be anything here yet.
+                    </div>
+                    
+                    
+                    <table class="table table-hover" ng-show="form.labs.length > 1">
+                        
+                        <th>Lab Name</th><th>Template Folder</th><th>Participation</th>
+                        
+                        <tr ng-repeat="lab in form.labs">
+                            <td>{{lab.title}}</td>
+                            <td>{{lab.folderName}}</td>
+                            <td>{{lab.participation}}</td>
+                            <td><button type="button" class="close" aria-hidden="true" ng-click=deleteLab(lab.id)>&times</button></td>
+                        
+                        </tr>
+                    </table>
+                </tab>
+            </tabset>
+            
+        <div class="footer">
+        	<hr>
+        	<p> There Labs - University of Missouri (Copyright 2014)</p>
+        </div>
+    
+        <script type="text/ng-template" id="FileChooser.html">
+            <div class="modal-header">
+                <h3 class="modal-title">Choose File!</h3>
+            </div>
+            
+            <div class="modal-body">
+                <select name="someText" data-ng-attr-size="{{itemsToChooseFrom.length}}">
+                    <option ng-repeat="item in itemsToChooseFrom" ng-click="selectFolder(item)">{{item}}</option>
+                </select> 
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-primary" ng-click="ok()">OK</button>
+                <button class="btn btn-secondary" ng-click="cancel()">Cancel</button>
+            </div>
+            
+        </script>
+        
+        <!-- end editable content -->
+    </div>
+</div>
