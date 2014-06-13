@@ -67,7 +67,7 @@
                         
                         <th>Lab Name</th><th>Template Folder</th><th>Participation</th>
                         
-                        <tr ng-repeat="lab in form.labs">
+                        <tr ng-repeat="lab in form.labs" ng-click="labClick(lab)">
                             <td>{{lab.title}}</td>
                             <td>{{lab.folderName}}</td>
                             <td>{{lab.participation}}</td>

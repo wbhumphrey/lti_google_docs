@@ -31,6 +31,10 @@ module LtiGoogleDocs
             @u = User.find_by(userid: params[:user_id])
             if !@u || !@u.refresh
                 #no => redirect with popup and so forth...
+                # This is handled by keeping @access_token set to nil.
+                # When the page is preparing to be served, it will check for @access_token
+                # and when it doesn't find it, it will insert javascript code that
+                # will trigger a popup to our :auth action down below this action.
                 puts "NO REFRESH TOKEN FOUND, SENDING POPUP"
                 session[:userid] = params[:user_id]
             else
@@ -57,7 +61,10 @@ module LtiGoogleDocs
         render template: 'lti_google_docs/launch/error', tp: tool_provider if tool_provider.lti_msg
     end
       
-    #The initial page will load a window up directed to this action.
+    #The initial page will load a window up directed to this action if
+    # 1) No existing access token is present and no refresh token is present
+    # 2) No existing access token is present, and retrieving an access token from refresh token causes an error.
+    # Item 2 can happen if User specifically revokes access to App via https://security.google.com/settings/u/0/security/permissions?pli=1
     def auth
         
         puts "params from auth: #{params}"

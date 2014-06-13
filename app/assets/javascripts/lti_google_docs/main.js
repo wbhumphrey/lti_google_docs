@@ -172,4 +172,8 @@ app.controller('FactoryCtrl', ['$scope', '$http', '$modal', function($scope, $ht
         });
     }
     
+    $scope.labClick = function(lab) {
+        console.log("CLICKED ON TABLE ROW!");
+        console.log(lab);
+    }
 }]);

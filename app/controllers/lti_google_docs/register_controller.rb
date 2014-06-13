@@ -64,6 +64,8 @@ module LtiGoogleDocs
         redirect_to "#{url}"
     end
         
+    # This action is redirected to from Google's OAuth2 popup so that
+    # we can retrieve OAuth tokens for Canvas
     def confirmed2
         code = params[:code]
         
@@ -77,46 +79,10 @@ module LtiGoogleDocs
         puts "ACCESS TOKEN: #{client.access_token}"
         
         puts client.list_courses
-        
-        #puts "================"
-        
         # THE BELOW COMMAND IS VERIFIED TO WORK
         #client.add_tool_to_course(1, "Test Tool", CANVAS_REDIRECT_URI)
         
-        
         render text: "ok"
-#        puts params
-#        if !params[:access_token]
-#            puts "NO ACCESS TOKEN YET, NEED TO SEND CODE NOW"
-#            code = params[:code]
-#            uri = URI.parse("http://127.0.0.1:3000/login/oauth2/token")
-#            response = Net::HTTP.post_form(uri, {"client_id"=>CANVAS_CLIENT_ID, "redirect_uri"=>CANVAS_REDIRECT_URI, "client_secret"=>CANVAS_CLIENT_SECRET, "code"=>code})
-#
-#            puts response.body
-#            obj = JSON.parse(response.body)
-#            
-#            
-#            puts "=== NEXT REQUEST! ==="
-#            uri2 = URI.parse("http://127.0.0.1:3000/api/v1/courses?access_token=#{obj['access_token']}")
-#            res2 = Net::HTTP.get_response(uri2)
-#            puts res2.body
-#            
-#            
-#            courses = JSON.parse(res2.body)
-#            puts "COURSE 0: #{courses[0]}"
-#    
-#    
-#            puts "==== LIST USERS IN COURSE REQUEST! ==="
-#            uri3 = URI.parse("http://127.0.0.1:3000/api/v1/courses/#{courses[0]["id"]}/users?access_token=#{obj['access_token']}")
-#            res3 = Net::HTTP.get_response(uri3)
-#            puts res3.body
-#    
-#            render text: obj["access_token"]
-#        else
-#            puts "WE HAVE ACCESS TOKEN SO WE'RE DONE!"
-#        end
-        
-#        render text: params.to_s
     end
     
     def index
@@ -178,6 +144,12 @@ module LtiGoogleDocs
     
     def list_courses
         uri = URI.parse("#{@canvas_url}/api/v1/courses?access_token=#{@access_token}")
+        response = Net::HTTP.get_response(uri)
+        JSON.parse(response.body)
+    end
+      
+    def list_students_in_course(course_id)
+        uri = URI.parse("#{@canvas_url"/api/v1/courses/#{course_id}/users?access=_token=#{@access_token}&enrollment_type=student")
         response = Net::HTTP.get_response(uri)
         JSON.parse(response.body)
     end
