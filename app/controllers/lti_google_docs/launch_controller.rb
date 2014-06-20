@@ -1,19 +1,11 @@
 require_dependency "lti_google_docs/application_controller"
 require_dependency "lti_google_docs/labs_controller"
 
-require 'google/api_client'
+
 
 module LtiGoogleDocs
   class LaunchController < ApplicationController
 
-      def initialize
-        obj = LtiGoogleDocs::Configuration.new
-        @@CLIENT_ID = obj.client_id
-        @@CLIENT_SECRET = obj.client_secret
-        @@REDIRECT_URI = obj.redirect_uri
-        @@SCOPES = obj.scopes
-      end
-      
     #The initial loading point for our LTI
     def index
         puts "INSIDE INDEX!"
@@ -70,9 +62,9 @@ module LtiGoogleDocs
         puts "params from auth: #{params}"
         puts "SESSION IN AUTH: #{session[:userid]}"
         ps = {};
-        ps[:redirect_uri] = REDIRECT_URI
-        ps[:client_id] = CLIENT_ID
-        ps[:scope] = SCOPES[0]
+        ps[:redirect_uri] = google_client.authorization.redirect_uri
+        ps[:client_id] = google_client.authorization.client_id
+        ps[:scope] = google_client.authorization.scope[0]
         ps[:immediate] = false
         ps[:approval_prompt] = 'force'
         ps[:response_type] = 'code'
@@ -80,19 +72,21 @@ module LtiGoogleDocs
         ps[:state] = '0xDEADBEEF'
 
         query = ps.to_query
+        puts query
         redirect_to "https://accounts.google.com/o/oauth2/auth?#{query}"
     end
 
     def hello
         
-        puts "TOKEN: #{session[:google_access_token]}"
-        client = Google::APIClient.new
-        client.authorization.client_id = @@CLIENT_ID
-        client.authorization.client_secret = @@CLIENT_SECRET
-        client.authorization.access_token = session[:google_access_token]
-        client.authorization.scope = @@SCOPES[0]
-        drive = client.discovered_api('drive', 'v2')
-        api_result = client.execute(
+#        puts "TOKEN: #{session[:google_access_token]}"
+#        client = Google::APIClient.new
+#        client.authorization.client_id = @@CLIENT_ID
+#        client.authorization.client_secret = @@CLIENT_SECRET
+        google_client.authorization.access_token = session[:google_access_token]
+#        client.authorization.access_token = session[:google_access_token]
+#        client.authorization.scope = @@SCOPES[0]
+        drive = google_client.discovered_api('drive', 'v2')
+        api_result = google_client.execute(
             :api_method => drive.files.list,
             :parameters => {});
         
@@ -111,9 +105,9 @@ module LtiGoogleDocs
             puts "RETRIEVED TOKEN: #{accessToken} ... PUTTING IN SESSION"
             session[:google_access_token] = accessToken
             
-            client.authorization.access_token = accessToken
-            drive = client.discovered_api('drive', 'v2')
-            api_result = client.execute(:api_method => drive.files.list,
+            google_client.authorization.access_token = accessToken
+            drive = google_client.discovered_api('drive', 'v2')
+            api_result = google_client.execute(:api_method => drive.files.list,
                                         :parameters => {});
             puts "RESULT FOR TRY 2: #{api_result.status}"
             if api_result.status == 200
@@ -125,38 +119,6 @@ module LtiGoogleDocs
         render json: result
     end
 
-    def is_access_token_valid?
-        if !session[:google_access_token] then return false end
-    
-        client = Google::APIClient.new
-        client.authorization.client_id = @@CLIENT_ID
-        client.authorization.client_secret = @@CLIENT_SECRET
-        client.authorization.access_token = session[:google_access_token]
-        client.authorization.scope = @@SCOPES[0]
-        drive = client.discovered_api('drive', 'v2')
-        api_result = client.execute(
-            :api_method => drive.files.list,
-            :parameters => {});
-        
-        if api_result.status != 200
-            return false
-        end
-            
-        return true
-    end
-
-    def retrieve_access_token(refresh_token)
-        client = Google::APIClient.new
-        client.authorization.client_id = @@CLIENT_ID
-        client.authorization.client_secret = @@CLIENT_SECRET
-        client.authorization.refresh_token = refresh_token
-        
-        client.authorization.grant_type = 'refresh_token'
-        
-        client.authorization.fetch_access_token!
-        
-        client.authorization.access_token
-    end
         
         
     def factory

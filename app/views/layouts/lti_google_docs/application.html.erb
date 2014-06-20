@@ -7,7 +7,21 @@
   <%= csrf_meta_tags %>
 </head>
 <body>
-
+<%= javascript_tag do %>
+    var handleLoad = function($scope) {
+    <% if !@access_token %>
+        window.open('launch/auth', 'LTI Authentication', "height=400, width=400")
+        window.success_auth = $scope.successfulAuthentication;
+    <% else %>
+        <% if !@canvas_access_token %>
+            window.open('register/canvas', 'LTI Authentication', "width=800, height=600")
+        <% else %>
+            $scope.successfulAuthentication();
+            window.close();
+        <% end %>
+    <% end %>
+    }
+<% end %>
 <%= yield %>
 
 </body>

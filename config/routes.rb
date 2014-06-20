@@ -1,4 +1,10 @@
 LtiGoogleDocs::Engine.routes.draw do
+  namespace :lti_google_docs do
+  namespace :labs do
+    get 'instances/index'
+    end
+  end
+
   root to: 'launch#index'
   namespace :launch do
     get '', to: :index
@@ -25,6 +31,11 @@ LtiGoogleDocs::Engine.routes.draw do
     post 'new', to: :create
     get 'all', to: :all
     delete ':id', to: :remove
+    
+    get ':id/instances', to: 'instances#show'
+    get 'instances/all', to: 'instances#all'
+    delete 'instances/:id', to: 'instances#remove'
+    resources :instances 
   end
 #  resources :labs
 #  post 'labs', to: 'labs#crazy'

@@ -4,6 +4,12 @@ Google_Credentials:
     redirect_uri: "http://127.0.0.1:31337/lti_google_docs/register/google"
     scopes: 'https://www.googleapis.com/auth/drive'
 
+Canvas_Credentials:
+    CANVAS_AUTH_URL: "http://127.0.0.1:3000/login/oauth2/auth"  
+    CANVAS_CLIENT_SECRET: "fznpV0Tl9GCjmaPBBvnFNUlz7zkvURu7GRtbXUi4ORsJX955EdoK0bvbnL65a0gZ"
+    CANVAS_CLIENT_ID: 2
+    CANVAS_REDIRECT_URI: "http://127.0.0.1:31337/lti_google_docs/register/confirmed2"
+
 object:
     one: '1'
     two: '2'

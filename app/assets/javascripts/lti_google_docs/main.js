@@ -1,4 +1,20 @@
-var app = angular.module('LTI_GOOGLE_DOCS', ['ui.bootstrap']);
+var app = angular.module('LTI_GOOGLE_DOCS', ['ngRoute','ui.bootstrap']);
+app.config(['$routeProvider', function($routeProvider) {
+    $routeProvider
+        .when('/',{
+            templateUrl: 'main.html',
+            controller: 'MainCtrl'
+        }).
+        when('instances', {
+            templateUrl: 'asdf.html',
+            controller: 'LabInstancesCtrl'
+        }).
+        otherwise({
+            redirectTo: '/'  
+    });
+}])
+
+
 
 var c = app.controller('MainCtrl', ['$scope', '$http', function($scope, $http) {
     $scope.items = [];
@@ -36,12 +52,13 @@ var c = app.controller('MainCtrl', ['$scope', '$http', function($scope, $http) {
     handleLoad($scope);
 }]);
 
-app.controller('FactoryCtrl', ['$scope', '$http', '$modal', function($scope, $http, $modal) {
+app.controller('FactoryCtrl', ['$scope', '$http', '$modal', '$location', function($scope, $http, $modal, $location) {
     
     $scope.nothing = "no text";
     $scope.asdfxxx = "no-lab";
     
     $scope.form = {};
+    $scope.form.labViews = {};
     
     $scope.createLab = function() {
       console.log("CREATING LAB WITH TITLE: "+$scope.form.labName+ " TEMPLATE: "+$scope.form.templateFolderName+" WITH ID: "+$scope.form.templateID+" AND PARTICIPATION: "+$scope.form.participationModel);
@@ -137,7 +154,8 @@ app.controller('FactoryCtrl', ['$scope', '$http', '$modal', function($scope, $ht
                     $scope.titlesToIDs[file.title] = file.id;
                 }
             }
-        }).error(function(data, status, headers, config) {
+        })
+        .error(function(data, status, headers, config) {
                 console.log("ERROR!");
                 console.log(data);
                 console.log(status);
@@ -152,6 +170,15 @@ app.controller('FactoryCtrl', ['$scope', '$http', '$modal', function($scope, $ht
             $scope.form.labs = data;
         }).error(function(data, status, headers, config) { 
             console.log("ERROR!");
+    });
+    
+    //retrieve lab instances
+    $http.get('labs/instances/all').success(function(data, status, headers, config) {
+        console.log("GOT LAB INSTANCES: ");
+        console.log(data);
+        $scope.form.labInstances = data;
+    }).error(function(data, status, headers, config) {
+        console.log("ERROR RETRIEVING LAB INSTANCES")
     });
     
     $scope.deleteLab = function(id) {
@@ -172,8 +199,56 @@ app.controller('FactoryCtrl', ['$scope', '$http', '$modal', function($scope, $ht
         });
     }
     
+    $scope.deleteLabInstance = function(id) {
+        console.log("YOU WANT TO DELETE LAB INSTANCE: "+id);
+        $http.delete("labs/instances/"+id).success(function(data, status, headers, config) {
+            console.log("SUCCESSFUL DELETION ON SERVER")
+            $http.get('labs/instances/all').success(function(data, status, headers, config) {
+                console.log("GOT LAB INSTANCES: ");
+                console.log(data);
+                $scope.form.labInstances = data;
+            }).error(function(data, status, headers, config) {
+                console.log("ERROR RETRIEVING LAB INSTANCES")
+            });
+        }).error(function(data, status, headers, config) {
+            
+        });
+    };
+    
     $scope.labClick = function(lab) {
-        console.log("CLICKED ON TABLE ROW!");
-        console.log(lab);
+//        console.log("CLICKED ON TABLE ROW!");
+//        console.log(lab);
+        $scope.form.labViews[lab.id] = lab;
+        
+        $http.get('labs/'+lab.id+'/instances')
+            .success(function(data, status, headers, config) {
+                console.log("GOT LAB INSTANCES!");
+                console.log(data);
+                if(data === "NEEDS AUTHENTICATION!") {
+                    window.open('register/canvas', 'LTI_AUTHENTICATION', "width=800, height=600");   
+                }
+                
+            }).error(function(data, status, headers, config) {
+                console.log("ERROR RETRIEVING LAB INSTANCES");
+        });
+
+    };
+    
+    $scope.removeLabView = function(id) {
+        console.log("REMOVING LAB VIEW: "+id);
+        delete $scope.form.labViews[id];
     }
+    
+    $scope.successfulAuthentication = function() {
+        console.log("AUTH SUCCESSFUL!");
+        
+    };
+    
+    handleLoad($scope);
 }]);
+
+var i = app.controller('LabInstancesCtrl', ['$scope', '$http', '$modal', function($scope, $http, $modal) {
+    $scope.items = ["a", "b", "c"]
+    
+}]);
+

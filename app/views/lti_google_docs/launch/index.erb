@@ -3,40 +3,12 @@
 
 <div ng-app='LTI_GOOGLE_DOCS'>
     <div id='google-lti-body' class="container"  ng-controller='MainCtrl'>
-        <!-- begin editable content -->
-        <%= javascript_tag do %>
-            var handleLoad = function($scope) {
-            <% if !@access_token %>
-                window.open('launch/auth', 'LTI Authentication', "height=400, width=400")
-                window.success_auth = $scope.successfulAuthentication;
-            <% else %>
-                $scope.successfulAuthentication();
-            <% end %>
-            }
-        <% end %>
-        
-        
 
-            
             <tabset>
                 <tab heading="Start Here">
                     Start here.
                 </tab>
-                <tab ng-repeat="item in items" heading="{{item.title}}">
-                    <iframe id='frame-{{item.id}}' width="100%" height="100%" style="resize: both; overflow: auto"></iframe>
-                </tab>
             </tabset>
-<!--
-            <accordion>
-                <accordion-group ng-repeat="item in items" heading={{item.title}}>
-                    {{item.title}}
-                    <br/>
-                    <iframe id='frame-{{item.id}}' style="width: 100%; height: 100%">{{item.embed}}</iframe>
-                </accordion-group>
-            </accordion>
--->
-<!--        </div>-->
-        
         <div class="footer">
         	<hr>
         	<p> There Labs - University of Missouri (Copyright 2014)</p>

@@ -4,16 +4,7 @@
 <div ng-app='LTI_GOOGLE_DOCS'>
     <div id='google-lti-body' class="container"  ng-controller='FactoryCtrl'>
         <!-- begin editable content -->
-        <%= javascript_tag do %>
-            var handleLoad = function($scope) {
-            <% if !@access_token %>
-                window.open('launch/auth', 'LTI Authentication', "height=400, width=400")
-                window.success_auth = $scope.successfulAuthentication;
-            <% else %>
-                $scope.successfulAuthentication();
-            <% end %>
-            }
-        <% end %>
+
             <tabset>
                 <tab heading="Create!">
                     <div class="jumbotron">
@@ -56,7 +47,7 @@
                         <button type="button" class="btn btn-lg btn-success pull-right" ng-click="createLab()">Create Lab!</button>
                     </div>
                 </tab>
-                <tab heading="See All!">
+                <tab heading="See All">
                     
                     <div class="jumbotron" ng-show="form.labs.length < 1">
                         There doesn't appear to be anything here yet.
@@ -66,15 +57,32 @@
                     <table class="table table-hover" ng-show="form.labs.length > 1">
                         
                         <th>Lab Name</th><th>Template Folder</th><th>Participation</th>
-                        
-                        <tr ng-repeat="lab in form.labs" ng-click="labClick(lab)">
+
+                        <tr ng-repeat="lab in form.labs" ng-click="labClick(lab)" >
                             <td>{{lab.title}}</td>
                             <td>{{lab.folderName}}</td>
                             <td>{{lab.participation}}</td>
                             <td><button type="button" class="close" aria-hidden="true" ng-click=deleteLab(lab.id)>&times</button></td>
-                        
+
                         </tr>
                     </table>
+                    <br/><br/>
+                    <table class="table table-hoever">
+                        <th>Lab Instance</th> <th> Lab ID</th> <th>Student ID</th> <th>Student's Folder ID On Drive</th>
+                        <tr ng-repeat="li in form.labInstances">
+                            <td>{{li.id}}</td>
+                            <td>{{li.labid}}</td>
+                            <td>{{li.studentid}}</td>
+                            <td>{{li.fileid}}</td>
+                            <td><button type="button" class="close" aria-hidden="true" ng-click=deleteLabInstance(li.id)>&times</button></td>
+                        </tr>
+                    </table>
+                    
+                </tab>
+                <tab ng-repeat="lab in form.labViews">
+                    <tab-heading>
+                        {{lab.title}} <i class="glyphicon glyphicon-remove" ng-click="removeLabView(lab.id)"></i> 
+                    </tab-heading>
                 </tab>
             </tabset>
             
