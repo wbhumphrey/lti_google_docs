@@ -1,5 +1,6 @@
 require 'google/api_client'
-
+require '../../lib/lti_google_docs/Configuration'
+require '../../lib/lti_google_docs/CanvasClient'
 module LtiGoogleDocs
     class ApplicationController < ActionController::Base
         before_action :set_default_headers
@@ -10,7 +11,8 @@ module LtiGoogleDocs
         def initialize
             super
 
-            conf = Configuration.new
+            conf = LtiGoogleDocs::Configuration.new
+            puts "APP CONTROLLER CONFIG: #{conf.inspect}"
             @google_client_id = conf.client_id
             @google_client_secret = conf.client_secret
             @google_redirect_uri = conf.redirect_uri
@@ -84,6 +86,8 @@ module LtiGoogleDocs
             @gc.authorization.client_id = @google_client_id
             @gc.authorization.client_secret = @google_client_secret
             @gc.authorization.redirect_uri = @google_redirect_uri
+            
+            puts "GOOGLE SCOPES: #{@google_scopes}"
             @gc.authorization.scope = @google_scopes[0]
 
             return @gc
@@ -94,7 +98,7 @@ module LtiGoogleDocs
             
             #HARDCODING THIS URL IS A TERRIBLE IDEA!
             # THIS SHOULD BE ACCESSED FROM AN ACCOUNTS DATABASE TABLE OR SUCH
-            @cc = CanvasClient.new("http://127.0.0.1:3000")
+            @cc = LtiGoogleDocs::CanvasClient.new("http://127.0.0.1:3000")
             @cc.client_id = @canvas_client_id
             @cc.redirect_uri = @canvas_redirect_uri
             @cc.client_secret = @canvas_client_secret
@@ -133,55 +137,6 @@ module LtiGoogleDocs
             google_client.authorization.fetch_access_token!
 
             google_client.authorization.access_token
-        end
-    end
-    
-    class Configuration
-        def initialize
-            puts "GETTING CONFIGURATION!"
-            config = YAML.load_file(File.join(__dir__, '../../../', 'config.yml'))
-            puts config.inspect
-            @client_id = config['Google_Credentials']['client_id']
-            @client_secret = config['Google_Credentials']['client_secret']
-            @redirect_uri = config['Google_Credentials']['redirect_uri']
-            @scopes = ["#{config['Google_Credentials']['scopes']}"]
-
-           @canvas_client_id = config['Canvas_Credentials']['CANVAS_CLIENT_ID']
-           @canvas_auth_url = config['Canvas_Credentials']['CANVAS_AUTH_URL']
-           @canvas_client_secret = config['Canvas_Credentials']['CANVAS_CLIENT_SECRET']
-           @canvas_redirect_uri = config['Canvas_Credentials']['CANVAS_REDIRECT_URI']
-        end
-
-        def client_id
-            @client_id
-        end
-
-        def client_secret
-            @client_secret
-        end
-
-        def redirect_uri
-            @redirect_uri
-        end
-
-        def scopes
-            @scopes
-        end
-
-        def canvas_client_id
-            @canvas_client_id
-        end
-
-        def canvas_auth_url
-            @canvas_auth_url
-        end
-
-        def canvas_client_secret
-            @canvas_client_secret
-        end
-
-        def canvas_redirect_uri
-            @canvas_redirect_uri
         end
     end
 

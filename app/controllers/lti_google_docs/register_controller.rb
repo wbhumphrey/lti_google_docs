@@ -71,10 +71,8 @@ module LtiGoogleDocs
     def confirmed2
         code = params[:code]
         puts "RETRIEVAL CODE: #{code}"
-        client = CanvasClient.new("http://127.0.0.1:3000")
-        client.client_id = CANVAS_CLIENT_ID
-        client.redirect_uri = CANVAS_REDIRECT_URI
-        client.client_secret = CANVAS_CLIENT_SECRET
+        client = canvas_client 
+
         client.auth_code = code
         
         client.request_access_token!

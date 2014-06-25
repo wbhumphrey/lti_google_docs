@@ -1,16 +1,11 @@
 Google_Credentials:
-    client_id: "558678724881-mnbk8edutlbrkvk7tu0v00cpqucp1j15.apps.googleusercontent.com"
-    client_secret: "E007PYt5yNSaFVwfRjLV2AiB"
+    client_id: "YOUR GOOGLE CLIENT_ID HERE"
+    client_secret: "YOUR GOOGLE CLIENT SECRET HERE"
     redirect_uri: "http://127.0.0.1:31337/lti_google_docs/register/google"
     scopes: 'https://www.googleapis.com/auth/drive'
 
 Canvas_Credentials:
     CANVAS_AUTH_URL: "http://127.0.0.1:3000/login/oauth2/auth"  
-    CANVAS_CLIENT_SECRET: "fznpV0Tl9GCjmaPBBvnFNUlz7zkvURu7GRtbXUi4ORsJX955EdoK0bvbnL65a0gZ"
-    CANVAS_CLIENT_ID: 2
+    CANVAS_CLIENT_SECRET: "YOUR CANVAS CLIENT SECRET HERE"
+    CANVAS_CLIENT_ID: YOUR CANVAS CLIENT ID
     CANVAS_REDIRECT_URI: "http://127.0.0.1:31337/lti_google_docs/register/confirmed2"
-
-object:
-    one: '1'
-    two: '2'
-    three: '3'

@@ -5,7 +5,7 @@ module LtiGoogleDocs
   
       #GET /labs
       def index
-          PUTS "INSIDE LABS INDEX"
+          puts "INSIDE LABS INDEX"
 #          obj = YAML.load_file(File.join(__dir__,'../../../', 'config.yml'))
 #          puts obj.inspect
           @access_token = session[:google_access_token]
