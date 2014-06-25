@@ -1,0 +1,11 @@
+Google_Credentials:
+    client_id: "YOUR GOOGLE CLIENT_ID HERE"
+    client_secret: "YOUR GOOGLE CLIENT SECRET HERE"
+    redirect_uri: "http://127.0.0.1:31337/lti_google_docs/register/google"
+    scopes: 'https://www.googleapis.com/auth/drive'
+
+Canvas_Credentials:
+    CANVAS_AUTH_URL: "http://127.0.0.1:3000/login/oauth2/auth"  
+    CANVAS_CLIENT_SECRET: "YOUR CANVAS CLIENT SECRET HERE"
+    CANVAS_CLIENT_ID: YOUR CANVAS CLIENT ID
+    CANVAS_REDIRECT_URI: "http://127.0.0.1:31337/lti_google_docs/register/confirmed2"
