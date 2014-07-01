@@ -152,13 +152,40 @@ module LtiGoogleDocs
         if !li
             puts "NO LAB INSTANCE FOUND WITH ID: #{id}"
         else
+            
+            if is_google_access_token_valid?(session[:google_access_token])
+                puts "GOOGLE ACCESS TOKEN VALID IN LAB INSTANCE REMOVE"
+            else
+                u = User.find_by(id: session[:userid])
+                if !u
+                    puts "USER DOES NOT EXIST"
+                else
+                    puts "REFRESHING ACCESS TOKEN"
+                    retrieve_access_token(u.refresh)
+                end
+            end
+            
+            drive = google_client.discovered_api('drive', 'v2')
+            file_to_remove = li.fileid
+            
+            result = google_client.execute(:api_method => drive.files.delete,
+                                        :parameters => {'fileId' => file_to_remove})
+            
+            if result.status != 204
+                puts "ERROR DELETING FILE WITH ID: #{file_to_remove}"
+                puts "RESULT STATUS: #{result.status}"
+                puts result.body.inspect
+            else
+                puts "SUCCESSFUL DELETION!"
+            end
+            
+            
             puts "DELETING INSTANCE: #{li.inspect}"
             li.delete
         end
         
         render text: 'ok'
     end
-
     
     def create_folder(name)
         drive = google_client.discovered_api('drive', 'v2')

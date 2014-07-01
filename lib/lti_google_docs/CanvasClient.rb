@@ -88,5 +88,22 @@ module LtiGoogleDocs
             puts "ADDED TOOL"
             puts response.body
         end
+        
+        def start_conversation(to, message)
+            uri = URI.parse("#{@canvas_url}/api/v1/conversations")
+            http = Net::HTTP.new(uri.host, uri.port)
+            
+            request = Net::HTTP::Post.new(uri.request_uri)
+            request["Authorization"] = "Bearer #{@access_token}"
+            
+            recipients = []
+            recipients.push(to)
+            to=1
+            request.set_form_data({"recipients"=>"#{to}", "subject" => "Attention ASDF GHJKL!", "body"=>message, "group_conversation"=>false, "attachment_ids"=>[], "scope"=>'unread'})
+            
+            puts "SENDING CONVERSATION START REQUEST TO RECIPIENTS: #{to}"
+            response = http.request(request)
+            puts response.body
+        end
     end
 end

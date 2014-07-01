@@ -218,12 +218,13 @@ app.controller('FactoryCtrl', ['$scope', '$http', '$modal', '$location', functio
     $scope.labClick = function(lab) {
 //        console.log("CLICKED ON TABLE ROW!");
 //        console.log(lab);
-        $scope.form.labViews[lab.id] = lab;
+//        $scope.form.labViews[lab.id] = lab;
         
         $http.get('labs/'+lab.id+'/instances')
             .success(function(data, status, headers, config) {
                 console.log("GOT LAB INSTANCES!");
                 console.log(data);
+                $scope.form.labInstances = data;
                 if(data === "NEEDS AUTHENTICATION!") {
                     window.open('register/canvas', 'LTI_AUTHENTICATION', "width=800, height=600");   
                 }

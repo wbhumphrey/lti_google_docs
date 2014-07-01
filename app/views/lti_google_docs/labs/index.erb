@@ -50,11 +50,11 @@
                 <tab heading="See All">
                     
                     <div class="jumbotron" ng-show="form.labs.length < 1">
-                        There doesn't appear to be anything here yet.
+                        There does not appear to be any labs yet.
                     </div>
                     
                     
-                    <table class="table table-hover" ng-show="form.labs.length > 1">
+                    <table class="table table-hover" ng-show="form.labs.length > 0">
                         
                         <th>Lab Name</th><th>Template Folder</th><th>Participation</th>
 
@@ -67,7 +67,11 @@
                         </tr>
                     </table>
                     <br/><br/>
-                    <table class="table table-hoever">
+                    
+                    <div class="jumbotron" ng-show="form.labInstances.length < 1">
+                        There does not appear to be any lab instances yet.
+                    </div>
+                    <table class="table table-hover" ng-show="form.labInstances.length > 0">
                         <th>Lab Instance</th> <th> Lab ID</th> <th>Student ID</th> <th>Student's Folder ID On Drive</th>
                         <tr ng-repeat="li in form.labInstances">
                             <td>{{li.id}}</td>

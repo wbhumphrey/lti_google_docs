@@ -1,30 +1,34 @@
 require 'google/api_client'
-require '../../lib/lti_google_docs/Configuration'
-require '../../lib/lti_google_docs/CanvasClient'
+require_dependency '../../lib/lti_google_docs/Configuration'
+require_dependency '../../lib/lti_google_docs/CanvasClient'
 module LtiGoogleDocs
     class ApplicationController < ActionController::Base
         before_action :set_default_headers
+        before_action :test_before
         before_filter :cors_preflight_check
         after_filter :cors_set_access_control_headers
 
-        #Load our configuration information for Google API access 
-        def initialize
-            super
+        def test_before
+            puts "JUST MAKING SURE THIS GETS EXECUTED EACH TIME!"
+            if !@google_client_id
+                conf = Configuration.new
+                puts "APP CONTROLLER CONFIG: #{conf.inspect}"
+                @google_client_id = conf.client_id
+                @google_client_secret = conf.client_secret
+                @google_redirect_uri = conf.redirect_uri
+                @google_scopes = conf.scopes
 
-            conf = LtiGoogleDocs::Configuration.new
-            puts "APP CONTROLLER CONFIG: #{conf.inspect}"
-            @google_client_id = conf.client_id
-            @google_client_secret = conf.client_secret
-            @google_redirect_uri = conf.redirect_uri
-            @google_scopes = conf.scopes
+                @canvas_auth_url = conf.canvas_auth_url
+                @canvas_client_secret = conf.canvas_client_secret
+                @canvas_client_id = conf.canvas_client_id
+                @canvas_redirect_uri = conf.canvas_redirect_uri
+            end
             
-            @canvas_auth_url = conf.canvas_auth_url
-            @canvas_client_secret = conf.canvas_client_secret
-            @canvas_client_id = conf.canvas_client_id
-            @canvas_redirect_uri = conf.canvas_redirect_uri
+            handle_access_token_state(params, session)
         end
 
         def set_default_headers
+            puts "SETTING DEFAULT HEADERS!"
           response.headers['X-Frame-Options'] = 'ALLOWALL'
         end
 
@@ -41,6 +45,7 @@ module LtiGoogleDocs
         # request, return only the necessary headers and return an empty
         # text/plain.
         def cors_preflight_check
+            puts "CORS PREFLIGHT CHECK"
           if request.method == :options
             headers['Access-Control-Allow-Origin'] = '*'
             headers['Access-Control-Allow-Methods'] = 'POST, GET, OPTIONS'
@@ -138,6 +143,66 @@ module LtiGoogleDocs
 
             google_client.authorization.access_token
         end
+            
+        def is_canvas_access_token_valid?
+            if !session[:canvas_access_token] then return false end
+                
+            #TODO: ACTUALLY CHECK THAT ACCESS TOKEN HAS NOT EXPIRED.
+            return true
+        end
+            
+            
+            
+              
+    def handle_access_token_state(params, session)
+        #check for Google Access Token in session
+        session[:userid] = params[:user_id]
+        if is_access_token_valid?
+            #yes => proceed as normal
+            puts "ACCESS TOKEN FOUND, NOTHING TO SEE HERE"
+            @access_token = session[:google_access_token]
+        else
+            #no => check User for refresh token given userid
+            puts "NO ACCESS TOKEN FOUND...LOOKING FOR REFRESH TOKEN"
+            @u = User.find_by(userid: params[:user_id])
+            if !@u || !@u.refresh
+                #no => redirect with popup and so forth...
+                # This is handled by keeping @access_token set to nil.
+                # When the page is preparing to be served, it will check for @access_token
+                # and when it doesn't find it, it will insert javascript code that
+                # will trigger a popup to our :auth action down below this action.
+                puts "NO REFRESH TOKEN FOUND, SENDING POPUP"
+                session[:userid] = params[:user_id]
+            else
+                #yes => retrieve access token, store in session, proceed as normal
+                # if something bad happens here, it's likely a bad refresh token
+                # so we will set the user's refresh token to nil, set the access token
+                # to nil and re-authenticate/authorize
+                begin
+                    puts "REFRESH TOKEN FOUND, RETRIEVING ACCESS TOKEN!"
+                    refreshToken = @u.refresh
+                    @access_token = retrieve_access_token(refreshToken)
+                    puts "ACCESS TOKEN RETRIEVED: #{@access_token} ... STORING IN SESSION"
+                    session[:google_access_token] = @access_token
+                rescue
+                    puts "SOMETHING BAD HAPPENED..."
+                    puts "REMOVING CURRENT REFRESH TOKEN..."
+                    User.find_by(userid: session[:userid]).update_attributes(:refresh => nil)
+                    
+                    @access_token = nil
+                end
+            end
+        end
+        
+        if is_canvas_access_token_valid?
+            puts "CANVAS ACCESS TOKEN FOUND, NOTHING TO SEE HERE"
+            @canvas_access_token = session[:canvas_access_token]
+        else
+            #TODO: WHAT HAPPENS WHEN ACCESS TOKEN IS INVALID?
+            #WE WON'T SET @canvas_access_token ERGO, MAKING THE POPUP APPEAR FOR CANVAS ONLY
+        end
+    end
+      
     end
 
 

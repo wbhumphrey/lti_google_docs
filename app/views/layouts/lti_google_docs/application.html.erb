@@ -10,12 +10,16 @@
 <%= javascript_tag do %>
     var handleLoad = function($scope) {
     <% if !@access_token %>
+        console.log("LAUNCHING WINDOW FOR GOOGLE AUTH");
         window.open('launch/auth', 'LTI Authentication', "height=400, width=400")
         window.success_auth = $scope.successfulAuthentication;
     <% else %>
+        console.log("GOOGLE AUTH PRESENT")
         <% if !@canvas_access_token %>
+            console.log("LAUNCHING WINDOW FOR CANVAS AUTH")
             window.open('register/canvas', 'LTI Authentication', "width=800, height=600")
         <% else %>
+        console.log("CANVAS AUTH PRESENT")
             $scope.successfulAuthentication();
             window.close();
         <% end %>

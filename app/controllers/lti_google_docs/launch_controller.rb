@@ -6,50 +6,11 @@ require_dependency "lti_google_docs/labs_controller"
 module LtiGoogleDocs
   class LaunchController < ApplicationController
 
+      
+
     #The initial loading point for our LTI
     def index
         puts "INSIDE INDEX!"
-        
-        
-        #check for Google Access Token in session
-        session[:userid] = params[:user_id]
-         if is_access_token_valid?
-            #yes => proceed as normal
-            puts "ACCESS TOKEN FOUND, NOTHING TO SEE HERE"
-            @access_token = session[:google_access_token]
-        else
-            #no => check User for refresh token given userid
-            puts "NO ACCESS TOKEN FOUND...LOOKING FOR REFRESH TOKEN"
-            @u = User.find_by(userid: params[:user_id])
-            if !@u || !@u.refresh
-                #no => redirect with popup and so forth...
-                # This is handled by keeping @access_token set to nil.
-                # When the page is preparing to be served, it will check for @access_token
-                # and when it doesn't find it, it will insert javascript code that
-                # will trigger a popup to our :auth action down below this action.
-                puts "NO REFRESH TOKEN FOUND, SENDING POPUP"
-                session[:userid] = params[:user_id]
-            else
-                #yes => retrieve access token, store in session, proceed as normal
-                # if something bad happens here, it's likely a bad refresh token
-                # so we will set the user's refresh token to nil, set the access token
-                # to nil and re-authenticate/authorize
-                begin
-                    puts "REFRESH TOKEN FOUND, RETRIEVING ACCESS TOKEN!"
-                    refreshToken = @u.refresh
-                    @access_token = retrieve_access_token(refreshToken)
-                    puts "ACCESS TOKEN RETRIEVED: #{@access_token} ... STORING IN SESSION"
-                    session[:google_access_token] = @access_token
-                rescue
-                    puts "SOMETHING BAD HAPPENED..."
-                    puts "REMOVING CURRENT REFRESH TOKEN..."
-                    User.find_by(userid: session[:userid]).update_attributes(:refresh => nil)
-                    
-                    @access_token = nil
-                end
-            end
-        end
-
         render template: 'lti_google_docs/launch/error', tp: tool_provider if tool_provider.lti_msg
     end
       
