@@ -25,24 +25,7 @@ module LtiGoogleDocs
           
           @access_token = session[:google_access_token]
           @canvas_access_token = session[:canvas_access_token]
-          
-          
-          
-          
-          puts "STARTING ACQUISITION OF USER INFO!"
 
-        oauth2 = google_client.discovered_api('oauth2', 'v2')
-        result = google_client.execute(:api_method => oauth2.userinfo.get)
-        
-        if result.status == 200
-            puts "SUCCESSFUL USER INFO RETRIEVAL"
-            puts result.data.inspect
-        else
-            puts "UNSUCCESSFUL USER INFO RETRIEVAL"
-            puts result.data.inspect
-        end
-        
-          
           if tool_provider.lti_msg
               render template: 'lti_google_docs/launch/error', tp: tool_provider
           else
