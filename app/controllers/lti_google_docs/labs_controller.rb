@@ -27,6 +27,22 @@ module LtiGoogleDocs
           @canvas_access_token = session[:canvas_access_token]
           
           
+          
+          
+          puts "STARTING ACQUISITION OF USER INFO!"
+
+        oauth2 = google_client.discovered_api('oauth2', 'v2')
+        result = google_client.execute(:api_method => oauth2.userinfo.get)
+        
+        if result.status == 200
+            puts "SUCCESSFUL USER INFO RETRIEVAL"
+            puts result.data.inspect
+        else
+            puts "UNSUCCESSFUL USER INFO RETRIEVAL"
+            puts result.data.inspect
+        end
+        
+          
           if tool_provider.lti_msg
               render template: 'lti_google_docs/launch/error', tp: tool_provider
           else
@@ -78,53 +94,10 @@ module LtiGoogleDocs
           puts "DELETING LAB WITH ID: #{lab_id}"
           
           lab = Lab.find_by(id: lab_id)
-        if(!lab)
-        else
-            
-            
-            lab_instances = LabInstance.where(labid: lab_id)
-            
-            if !lab_instances.blank?
-                # delete folder on google drive
-                
-                if is_google_access_token_valid?(session[:google_access_token])
-                    puts "GOOGLE ACCESS TOKEN VALID IN LAB REMOVE"
-                else
-                    u = User.find_by(id: session[:userid])
-                    if !u
-                        puts "USER DOES NOT EXIST!"
-                    else
-                        puts "REFRESHING ACCESS TOKEN"
-                        retrieve_access_token(u.refresh)
-                    end
-                end
-                    
-                drive = google_client.discovered_api('drive', 'v2')
-                
-                
-                
-                lab_instances.each do |li|
-                    file_to_delete_from_drive = li.fileid
-                    puts "ID OF FILE TO DELETE: #{li.fileid}"
-                    
-                    result = google_client.execute(:api_method => drive.files.delete,
-                                                :parameters => {'fileId' => file_to_delete_from_drive})
-                    
-                    if result.status != 204
-                        puts "ERROR DELETING FILE WITH ID: #{li.fileid}"
-                        puts "RESULT STATUS #{result.status}"
-                        puts result.body.inspect
-                    else
-                        puts "SUCCESSFUL DELETION!"
-                    end
-                end
-            end
-            
-            #destroy lab instances
-            LabInstance.destroy_all(labid: lab_id)
-        end
-          #destroy labs
-            lab.destroy
+          lab.destroy
+          
+          
+          
           render text: "ok"
       end
   end

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140619150912) do
+ActiveRecord::Schema.define(version: 20140702152228) do
 
   create_table "lab_instances", force: true do |t|
     t.string   "labid"
@@ -49,6 +49,7 @@ ActiveRecord::Schema.define(version: 20140619150912) do
     t.string   "refresh"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "email"
   end
 
 end

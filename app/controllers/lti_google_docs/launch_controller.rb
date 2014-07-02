@@ -6,11 +6,12 @@ require_dependency "lti_google_docs/labs_controller"
 module LtiGoogleDocs
   class LaunchController < ApplicationController
 
-      
-
     #The initial loading point for our LTI
     def index
         puts "INSIDE INDEX!"
+
+        #NO NEED TO SET session[:userid] here, IT'S ALREADY DONE IN ApplicationController
+        
         render template: 'lti_google_docs/launch/error', tp: tool_provider if tool_provider.lti_msg
     end
       
@@ -25,7 +26,7 @@ module LtiGoogleDocs
         ps = {};
         ps[:redirect_uri] = google_client.authorization.redirect_uri
         ps[:client_id] = google_client.authorization.client_id
-        ps[:scope] = google_client.authorization.scope[0]
+        ps[:scope] = "https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/userinfo.email"
         ps[:immediate] = false
         ps[:approval_prompt] = 'force'
         ps[:response_type] = 'code'
