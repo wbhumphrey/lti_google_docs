@@ -96,9 +96,6 @@ module LtiGoogleDocs
             request = Net::HTTP::Post.new(uri.request_uri)
             request["Authorization"] = "Bearer #{@access_token}"
             
-            recipients = []
-            recipients.push(to)
-            to=1
             request.set_form_data({"recipients"=>"#{to}", "subject" => "Attention ASDF GHJKL!", "body"=>message, "group_conversation"=>false, "attachment_ids"=>[], "scope"=>'unread'})
             
             puts "SENDING CONVERSATION START REQUEST TO RECIPIENTS: #{to}"

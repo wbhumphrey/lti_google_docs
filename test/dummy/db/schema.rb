@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140702152228) do
+ActiveRecord::Schema.define(version: 20140703172919) do
 
   create_table "lab_instances", force: true do |t|
     t.string   "labid"
@@ -40,6 +40,14 @@ ActiveRecord::Schema.define(version: 20140702152228) do
   create_table "lti_google_docs_users", force: true do |t|
     t.string   "userid"
     t.string   "refresh"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "share_requests", force: true do |t|
+    t.string   "creator"
+    t.string   "for"
+    t.string   "file_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

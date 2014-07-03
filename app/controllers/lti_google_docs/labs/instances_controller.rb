@@ -54,9 +54,6 @@ module LtiGoogleDocs
             course = session["current_course_id"]
             
             results = canvas_client.list_students_in_course(course)
-            puts "RESULTS! #{results}"
-            results.each
-            
             
             if !results.blank?
                 if  results.kind_of?(Array)
@@ -100,7 +97,10 @@ module LtiGoogleDocs
                         
                             # CREATE A NEW FOLDER
                             id_of_new_folder = create_folder(title)
-                                
+
+                            # SHARE FILE (OR AT LEAST TRY TO)
+                            share_file(result['id'], session[:userid], id_of_new_folder)
+
                             # FOR EVERY FILE IN FOLDER
                             child_list_result.data.items.each do |item|
                                 puts "CHILD ID: #{item.id}"
@@ -110,6 +110,10 @@ module LtiGoogleDocs
                                 file_title = file_data.title
                                 # MAKE A COPY OF FILE
                                 copy_file(item.id, id_of_new_folder, file_title)
+                                
+                                #share file if possible, otherwise add to set of files to shared with this user
+                                #TODO.
+                                
                             end
                         
                             puts "CREATING LAB!"
@@ -334,5 +338,55 @@ module LtiGoogleDocs
             puts "SOMETHING WENT WRONG LISTING PARENTS"
         end
     end
+
+    def share_file_on_drive(id, email)
+        drive = google_client.discovered_api('drive', 'v2')
+        new_permission = drive.permission.insert.request_schema.new({
+            'value' => email,
+            'type' => 'user',
+            'role' => 'writer'
+        })
+        
+        result = client.execute(
+            :api_method => drive.permissions.insert,
+            :body_object => new_permission,
+            :parameters => {'fileId' => id})
+        
+        if result.status == 200
+            puts "PERMISSION INSERTION SUCCESSFUL!"
+            puts result.data.inspect
+        else
+            puts "PERMISSION INSERTION UNSUCCESSFUL"
+            puts result.status
+            puts result.data.inspect
+        end
+    end
+
+    def share_file(to, from, fileid)
+        #Get id of user we're sharing to -> should be in result["id"]
+        student_id = to
+        #Get user from id
+        student = User.find_by(id: student_id)
+        if student
+            #if user exists...get email
+           if student.email 
+                #if email exists, do share
+               share_file_on_drive(fileid, student.email)
+            else
+                #if email does not exist, send message via conversation
+               puts "STUDENT #{student_id} HAS NOT LOGGED IN YET...ADDING REQUEST TO TABLE...SENDING MESSAGE"
+               ShareRequests.create(creator: from, for: student_id, file_id: fileid)
+                canvas_client.start_conversation(student_id, 'One or more files have been shared with you on Google Drive. Please log in to MU Labs to view.')
+
+            end
+        else
+             #if user does not exist, add to ShareRequests table
+            puts "STUDENT: #{student_id} DOES NOT EXIST...ADDING REQUEST TO TABLE...SENDING MESSAGE."
+            ShareRequests.create(creator: from, for: student_id, file_id: fileid)
+            canvas_client.start_conversation(student_id, 'One or more files have been shared with you on Google Drive. Please log in to MU Labs to view.')
+        end
+    
+    end
+
   end
 end
