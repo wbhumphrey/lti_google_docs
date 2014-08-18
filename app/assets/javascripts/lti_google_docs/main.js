@@ -1,5 +1,8 @@
-var app = angular.module('LTI_GOOGLE_DOCS', ['ngRoute','ui.bootstrap']);
-app.config(['$routeProvider', function($routeProvider) {
+var app = angular.module('LTI_GOOGLE_DOCS', ['ngRoute','ui.bootstrap', 'ngCookies']);
+app.config(['$routeProvider', '$sceProvider', function($routeProvider, $sceProvider) {
+    
+    $sceProvider.enabled(false);
+    
     $routeProvider
         .when('/',{
             templateUrl: 'main.html',
@@ -250,6 +253,28 @@ app.controller('FactoryCtrl', ['$scope', '$http', '$modal', '$location', functio
 
 var i = app.controller('LabInstancesCtrl', ['$scope', '$http', '$modal', function($scope, $http, $modal) {
     $scope.items = ["a", "b", "c"]
+    
+}]);
+
+app.controller('StudentLabCtrl', ['$scope', '$http', '$cookies', '$sce', function($scope, $http, $cookies, $sce) {
+    $scope.things = ["one", "three", "five", "seven", "nine"];
+    $scope.fileIDs = [];
+    console.log("PRINTING COOKIES!");
+    for(var i in $cookies) {
+        console.log(i+"=>"+$cookies[i]);
+    }
+                    
+    var files = angular.fromJson($cookies.files);
+    console.log(angular.fromJson(files));
+    var file_items = files.items; //is an array
+    
+    for(var i in file_items) {
+        var item = file_items[i];
+        console.log("fileid: "+item.id);
+//        $sce.trustAsUrl("https://docs.google.com/document/d/"+item.id+"?embedded=true");
+        $scope.fileIDs.push({url: "https://docs.google.com/document/d/"+item.id+"", id: item.id});
+    }
+                    
     
 }]);
 

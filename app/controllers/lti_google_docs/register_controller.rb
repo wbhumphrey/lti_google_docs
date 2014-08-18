@@ -1,4 +1,5 @@
 require_dependency "lti_google_docs/application_controller"
+require_dependency "../../lib/lti_google_docs/GoogleDriveClient"
 require 'google/api_client'
 require 'json'
 require 'net/http'
@@ -50,7 +51,7 @@ module LtiGoogleDocs
             #create new user with refresh token and email address
             User.create(userid: session[:userid], refresh: client.authorization.refresh_token, email: info['email'])
         end
-    
+
         # We redirect to a page that automatically closes itself
         # since this is redirected to a popup.
 #        redirect_to "/lti_google_docs/register/confirmed"
@@ -108,5 +109,12 @@ module LtiGoogleDocs
         
         return result.data
     end
+
+    def drive
+        return @drive_client if @drive_client
+        @drive_client = LtiGoogleDocs::GoogleDriveClient.new(:google_client => google_client, :canvas_client => canvas_client)
+        return @drive_client
+    end
+
   end
 end

@@ -31,7 +31,10 @@ LtiGoogleDocs::Engine.routes.draw do
     post 'new', to: :create
     get 'all', to: :all
     delete ':id', to: :remove
-    
+    get ':id', to: :show
+    post ':id', to: :show
+    post ':id/view', to: :view
+      
     get ':id/instances', to: 'instances#show'
     get 'instances/all', to: 'instances#all'
     delete 'instances/:id', to: 'instances#remove'

@@ -30,6 +30,67 @@ module LtiGoogleDocs
           end
       end
       
+      def show
+        "INSIDE LABS SHOW!"
+          @access_token = session[:google_access_token]
+          @canvas_access_token = session[:canvas_access_token]
+          
+          labid = params[:id]
+          @students_not_logged_in = [];
+          if !tool_provider.student?
+              # for teachers/designers, we want to
+              # 1) Send out pending requests from our userid for labs
+              # 1.1) Get requests from us
+              requests = ShareRequests.where(creator: session[:userid])
+              # 1.2) for every request, get the User associated with :for
+              requests.each do |request|
+                  student_user_id = request['for'];
+                  student = Users.find(userid: student_user_id);
+                  if student
+                      #student exists
+                      if recipient.email
+                          # and has logged in
+                          # 1.3) If user has email address, update permission. If not, do nothing
+                          drive.share_file_on_drive(request.file_id, recipient.email)
+
+                      else
+                          # but has not logged in
+                          @students_not_logged_in.push(student);
+                      end
+
+                  else
+                      #student does not exist
+                  end
+              end
+              
+              render 'manage'
+          else
+              # for students, we want to
+              # 1) Get the lab instance for our userid and this lab
+              puts "STUDENT SESSION USERID: #{session[:userid]}"
+              lab_instance = LabInstance.find_by(studentid: session[:userid])
+              if lab_instance
+              # 2) Retrieve our folderid in the lab instance
+                  folder_id = lab_instance.fileid
+              # 3) Get the children of the folder
+                  files_in_folder = drive.list_children(folder_id)
+              # 4) Show the files
+                  
+                  cookies['files'] = JSON.generate(files_in_folder);
+                  if request.query_parameters[:json]
+                      cookies["super secret message"] = "eat more chicken"
+                    render json: files_in_folder.to_json;
+                    return;
+                  end
+              else
+                  puts "LAB INSTANCE FOR STUDENT NOT FOUND!"
+              end
+          end
+          cookies[:message] = "eat more chicken"
+          render "student"
+#          render text: "VIEWING LAB: #{params[:id]} WITH REQUEST: #{request.path_parameters.inspect}"
+      end
+      
       def all
           puts "CANVAS ACCESS TOKEN FROM SESSION: #{session[:canvas_access_token]}"
           puts "CANVAS ACCESS TOKEN FROM CLIENT: #{canvas_client.access_token}"
@@ -40,6 +101,23 @@ module LtiGoogleDocs
           render json: labs
       end
       
+      #POST /labs/:id/view
+      def view
+          puts "INSIDE LABS VIEW!"
+          @access_token = session[:google_access_token]
+          @canvas_access_token = session[:canvas_access_token]
+          
+          if tool_provider.student?
+            render 'studentLab'
+            return; 
+          else if tool_provider.instructor? || tool_provider.admin?
+            render 'manageLab'
+            return;
+          end
+          
+          render template: 'lti_google_docs/launch/error', tp: tool_provider if tool_provider.lti_msg
+      end
+
       #POST /labs/new
       def create
           puts "INSIDE CREATE"
@@ -69,6 +147,13 @@ module LtiGoogleDocs
           lab.destroy
  
           render text: "ok"
+      end
+
+      def drive
+        return @drive_client if @drive_client
+        
+          @drive_client = LtiGoogleDocs::GoogleDriveClient.new(:google_client => google_client, :canvas_client => canvas_client)
+        return @drive_client
       end
   end
 end
