@@ -44,8 +44,30 @@
                 </div>
             </div>
             
+            
+            <div class="row">
+                <div class="col-lg-2">
+                    <label>LTI Client ID:</label>
+                </div>
+                <div class="col-lg-8" tooltip-placement="top" tooltip="The person configuring your Canvas server to use this tool will enter this in the Consumer Key textbox">
+                    {{form.client_id}}
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-2">
+                    <label>LTI Client Secret:</label>
+                </div>
+                
+                <div class="col-lg-8" tooltip-placement="bottom" tooltip="The person configuring your Canvas server to use this tool will enter this in the consumer secret textbox">
+                    {{form.client_secret}}
+                </div>
+            </div>
+            
             <button type="button" class="btn btn-lg btn-primary pull-right" ng-click="updateAccountInfo()">Update!</button>
             <br/>
+            <h1><i class="fa fa-spinner fa-spin"></i></h1>
+            
             <%= hidden_field_tag 'client_id', @c.id%>
         </div>
     </div>

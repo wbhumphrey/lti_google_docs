@@ -20,6 +20,7 @@ gem 'angular-ui-bootstrap-rails'
 gem 'sass-rails', '~> 4.0.0'
 gem 'bootstrap-sass', '~>3.1.1.1'
 gem 'jquery-rails', '~> 3.1.0'
+gem 'font-awesome-sass'
 
 gem 'google-api-client', '>= 0.6'
 gem 'signet', :git => 'git://github.com/google/signet.git'
