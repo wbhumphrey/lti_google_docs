@@ -60,18 +60,20 @@ module LtiGoogleDocs
           end
         end
 
-        $oauth_creds = {"test" => "secret", "testing" => "supersecret"}
+#        $oauth_creds = {"test" => "secret", "testing" => "supersecret"}
 
         def tool_provider
           return @tp if @tp
 
-              
-        
-            
-            
-            
-          key = params['oauth_consumer_key']
-          secret = $oauth_creds[key]
+          key = params["oauth_consumer_key"]
+          client = Client.find_by(client_id: key)
+          secret = nil;
+          if client
+            secret = client.client_secret
+          end
+         
+#          key = params['oauth_consumer_key']
+#          secret = $oauth_creds[key]
           @tp = IMS::LTI::ToolProvider.new(key, secret, params)
 
           if !key
