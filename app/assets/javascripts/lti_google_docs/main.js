@@ -278,3 +278,54 @@ app.controller('StudentLabCtrl', ['$scope', '$http', '$cookies', '$sce', functio
     
 }]);
 
+app.controller('RegistrationCtrl', ['$scope', '$http', '$location', function($scope, $http, $location) {
+
+    $scope.form = {};
+                    
+    $scope.submitRegistration = function() {
+        console.log("Submitting registration!");
+        console.log($scope.form);
+                    
+        $http.post('/lti_google_docs/api/v2/clients', $scope.form).success(function(data){
+            console.log("SUCCESSFUL POST!");
+            console.log(data);
+            $location.path("/lti_google_docs/api/v2/clients/"+data.id);
+            }).error(function(error) {
+                console.log("ERROR POSTING REGISTRATION DATA!");            
+        });
+    };
+}]);
+
+app.controller('AccountInfoCtrl', ['$scope', '$http', '$location', function($scope, $http, $location) {
+                    
+    console.log(angular.element("#client_id")[0].value);
+    var client_id = angular.element("#client_id")[0].value;
+    $http.get("/lti_google_docs/api/v2/clients/"+client_id+"?query=true")
+            .success(function(data) {
+                console.log("SUCCESSFUL RETRIEVAL!");
+                console.log(data);
+                    
+                $scope.form = data;
+            })
+            .error(function(error) {
+                    
+                console.log("ERROR RETRIEVING ACCOUNT INFORMATION!");
+                console.log(error);
+            });
+                    
+    $scope.updateAccountInfo = function() {
+        console.log("SENDING UPDATE REQUEST!");
+        console.log($scope.form);
+                    
+        $http.put("/lti_google_docs/api/v2/clients/"+client_id, $scope.form)
+                .success(function(data) {
+                    console.log("UPDATE RECEIVED");
+                    console.log(data);
+                    $scope.form = data;
+                    })
+                .error(function(data) {
+                    console.log("ERROR RECEIVED FROM SERVER!");
+                    console.log(data);
+                    });
+    };
+}]);

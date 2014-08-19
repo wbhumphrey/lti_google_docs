@@ -1,0 +1,25 @@
+<div ng-app="LTI_GOOGLE_DOCS">
+    <div id="google-lti-body" class="container" ng-controller="StudentLabCtrl">
+    hello
+        <tabset>
+            <tab ng-repeat="file in fileIDs">
+                <tab-heading>
+                    {{file.id}}
+                </tab-heading>
+                <div class="resize: both; overflow: auto">
+                    <iframe src="{{file}}" ></iframe>
+                </div>
+            </tab>
+        </tabset>
+        
+<!--
+        <tabset>
+            <tab heading="first">nothing to see</tab>
+            <tab heading="test">
+                <iframe src="https://docs.google.com/viewer?srcid={{fileIDs[0]}}">
+                </iframe>
+            </tab>
+        </tabset>
+-->
+    </div>
+</div>

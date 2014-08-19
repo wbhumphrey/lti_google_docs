@@ -65,6 +65,11 @@ module LtiGoogleDocs
         def tool_provider
           return @tp if @tp
 
+              
+        
+            
+            
+            
           key = params['oauth_consumer_key']
           secret = $oauth_creds[key]
           @tp = IMS::LTI::ToolProvider.new(key, secret, params)

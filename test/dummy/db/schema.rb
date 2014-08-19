@@ -11,7 +11,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140703172919) do
+ActiveRecord::Schema.define(version: 20140818210245) do
+
+  create_table "clients", force: true do |t|
+    t.string   "client_name"
+    t.string   "canvas_url"
+    t.string   "canvas_clientid"
+    t.string   "canvas_client_secret"
+    t.string   "contact_email"
+    t.string   "client_id"
+    t.string   "client_secret"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "lab_instances", force: true do |t|
     t.string   "labid"

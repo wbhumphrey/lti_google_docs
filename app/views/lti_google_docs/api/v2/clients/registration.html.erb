@@ -1,0 +1,53 @@
+<div ng-app="LTI_GOOGLE_DOCS">
+    <div id="google-lti-body" class="container" ng-controller="RegistrationCtrl">
+        <div class="jumbotron">
+            <h1> Register your organization!</h1>
+            <br/><br/>
+            <div class="form-group row">
+                <div class="col-lg-5">
+                    <label for="org-name">Organization Name</label>
+                </div>
+                <div class="col-lg-5">
+                    <input tooltip="The name of your organization" tooltip-placement="left" type="text" class="form-control" id="org-name" placeholder="Mizzou K12" ng-model="form.client_name">
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-lg-5">
+                    <label for="canvas-url">Canvas URL</label>
+                </div>
+                <div class="col-lg-5">
+                    <input tooltip="The address you type in your browser to log into Canvas" tooltip-placement="left" type="text" class="form-control" id="canvas-url" placeholder="http://www.my-school.edu/Canvas" ng-model="form.canvas_url">
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-lg-5">
+                    <label for="canvas-clientid">Canvas ClientID</label>
+                </div>
+                <div class="col-lg-5">
+                    <input tooltip="The number your Canvas instance generated for use with this LTI." tooltip-placement="left" type="text" class="form-control" id="canvas-clientid" placeholder="Really long number" ng-model="form.canvas_clientid">
+                </div>
+            </div>
+            
+            <div class="form-group row">
+                <div class="col-lg-5">
+                    <label for="canvas-client-secret">Canvas Client Secret</label>
+                </div>
+                <div class="col-lg-5">
+                    <input tooltip="The really long piece of text your Canvas instance generated for you, for use with this LTI" tooltip-placement="left" type="text" class="form-control" id="canvas-client-secret" placeholder="Even longer number" ng-model="form.canvas_client_secret">
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-lg-5">
+                    <label for="contact-email">Contact Email Address</label>
+                </div>
+                <div class="col-lg-5">
+                    <input tooltip="An email address we can use to contact you in case something goes wrong" tooltip-placement="left" type="text" class="form-control" id="contact_email" placeholder="admin@my-school.edu" ng-model="form.contact_email">
+                </div>
+            </div>
+            
+            <button type="button" class="btn btn-lg btn-success pull-right" ng-click="submitRegistration()">Okay, let's go!</button>
+            <br/>
+            
+        </div>
+    </div>
+</div>

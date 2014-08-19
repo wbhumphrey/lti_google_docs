@@ -42,4 +42,22 @@ LtiGoogleDocs::Engine.routes.draw do
   end
 #  resources :labs
 #  post 'labs', to: 'labs#crazy'
+
+#prototype for v2
+  namespace :api do
+      namespace :v2 do
+        resources :clients do
+            resources :courses do
+                resources :labs do
+                    resources :instances do
+                    end
+                end
+            end
+        end
+    end
+  end
+
+# the above should produce paths such as: /api/v2/clients/0/courses/0/labs/0/instances/0
+# the above 
+
 end
