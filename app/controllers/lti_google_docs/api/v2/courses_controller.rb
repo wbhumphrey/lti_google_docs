@@ -1,4 +1,4 @@
-require_dependency "lti_google_Docs/application_controller"
+require_dependency "lti_google_docs/application_controller"
 
 module LtiGoogleDocs::Api::V2
     class CoursesController < LtiGoogleDocs::ApplicationController
