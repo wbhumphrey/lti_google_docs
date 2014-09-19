@@ -62,8 +62,7 @@ module LtiGoogleDocs::Api::V2
         
         def ready_course
             
-            User.destroy_all
-            reset_session
+            @ready_course = true;
             
             puts "PREPARING COURSE FOR INTEGRATION!"
             if request.post?

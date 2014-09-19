@@ -327,7 +327,8 @@ app.controller('RegistrationCtrl', ['$scope', '$http', '$location', function($sc
         $http.post('/lti_google_docs/api/v2/clients', $scope.form).success(function(data){
             console.log("SUCCESSFUL POST!");
             console.log(data);
-            $location.path("/lti_google_docs/api/v2/clients/"+data.id);
+            //$location.path("/lti_google_docs/api/v2/clients/"+data.id);
+            location.href="/lti_google_docs/api/v2/clients/"+data.id;
             }).error(function(error) {
                 console.log("ERROR POSTING REGISTRATION DATA!");            
         });
@@ -358,7 +359,7 @@ app.controller('AccountInfoCtrl', ['$scope', '$http', '$location', function($sco
     
                     
     $scope.successfulAuthentication = function() {
-        
+        console.log("SUCCESSFUL AUTHENTICATION!");
                     
         $http.get("/lti_google_docs/api/v2/clients/"+client_id+"?query=true")
         .success(function(data) {
