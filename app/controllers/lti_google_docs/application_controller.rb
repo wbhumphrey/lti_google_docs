@@ -1,6 +1,9 @@
 require 'google/api_client'
 require_dependency '../../lib/lti_google_docs/Configuration'
 require_dependency '../../lib/lti_google_docs/CanvasClient'
+
+require 'socket'
+
 module LtiGoogleDocs
     class ApplicationController < ActionController::Base
         before_action :set_default_headers
@@ -9,12 +12,14 @@ module LtiGoogleDocs
         after_filter :cors_set_access_control_headers
 
         def test_before
-#            puts "JUST MAKING SURE THIS GETS EXECUTED EACH TIME!"
+            puts "JUST MAKING SURE THIS GETS EXECUTED EACH TIME!"
             if !@google_client_id
                 conf = Configuration.new
 #                puts "APP CONTROLLER CONFIG: #{conf.inspect}"
                 @google_client_id = conf.client_id
                 @google_client_secret = conf.client_secret
+               
+                puts "#CONFIG GOOGLE REDIRECT URI: #{conf.redirect_uri}"
                 @google_redirect_uri = conf.redirect_uri
                 @google_scopes = conf.scopes
                 @google_scopes.push("https://www.googleapis.com/auth/userinfo")
@@ -30,6 +35,14 @@ module LtiGoogleDocs
             puts "\nTEST_BEFORE SESSION: #{session.inspect}"
             
             handle_access_token_state(params, session)
+            
+            if request.post?
+               if params["custom_canvas_api_domain"]
+                   @canvas_domain = params["custom_canvas_api_domain"]
+                else
+                    @canvas_domain = "No such url";
+                end
+            end
         end
 
         def set_default_headers
@@ -165,12 +178,13 @@ module LtiGoogleDocs
                   
         def handle_access_token_state(params, session)
            puts "CHECKING ACCESS TOKEN STATE!"
+            puts "PARAMS IN HANDLE_ACCESS_TOKEN_STATE: #{params.inspect}"    
             
-           puts "PARAM WITH SYMBOL: #{params[:custom_canvas_user_id]}"
-           puts "PARAM WITH STRING: #{params['custom_canvas_user_id']}"
+           puts "CUSTOM CANVAS USER ID PARAM WITH SYMBOL: #{params[:custom_canvas_user_id]}"
+           puts "CUSTOM CANVAS USER ID PARAM WITH STRING: #{params['custom_canvas_user_id']}"
+           puts "ID PARAM WITH SYMBOL: #{params[:id]}"
             
-            
-            if !params[:custom_canvas_user_id]
+            if session[:custom_canvas_user_id]
                 puts "NO REASON TO RE SET session[:userid]!"
             else
                 puts "\n*\n*\nSETTING session[:userid] to: #{params[:custom_canvas_user_id]}"
@@ -193,7 +207,6 @@ module LtiGoogleDocs
                     # and when it doesn't find it, it will insert javascript code that
                     # will trigger a popup to our :auth action down below this action.
                     puts "NO REFRESH TOKEN FOUND, SENDING POPUP"
-#                    session[:userid] = params[:user_id]
                 else
                     #yes => retrieve access token, store in session, proceed as normal
                     # if something bad happens here, it's likely a bad refresh token
@@ -216,7 +229,7 @@ module LtiGoogleDocs
             end
 
             if is_canvas_access_token_valid?
-                puts "CANVAS ACCESS TOKEN FOUND, NOTHING TO SEE HERE"
+                puts "CANVAS ACCESS TOKEN FOUND, NOTHING TO SEE HERE: #{session[:canvas_access_token]}"
                 @canvas_access_token = session[:canvas_access_token]
             else
                 #TODO: WHAT HAPPENS WHEN ACCESS TOKEN IS INVALID?
@@ -224,5 +237,10 @@ module LtiGoogleDocs
             end
         end
       
+        def get_my_ip_address
+            #Socket::getaddrinfo(Socket.gethostname, "echo", Socket::AF_INET)[0][3]
+            Socket::gethostname
+        end
+
     end
 end

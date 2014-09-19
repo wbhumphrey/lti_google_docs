@@ -70,6 +70,10 @@ module LtiGoogleDocs
         end
 
         def add_tool_to_course(course, tool_name, tool_url)
+            add_tool_to_course_with_credentials(course, tool_name, tool_url, "test", "secret")
+        end
+        
+        def add_tool_to_course_with_credentials(course, tool_name, tool_url, consumer_key, shared_secret) 
             uri = URI.parse("#{@canvas_url}/api/v1/courses/#{course}/external_tools")
             http = Net::HTTP.new(uri.host, uri.port)
             request = Net::HTTP::Post.new(uri.request_uri)
@@ -78,7 +82,7 @@ module LtiGoogleDocs
 
             puts request["Authorization"]
 
-            request.set_form_data({"name"=>tool_name, "consumer_key"=>"test", "shared_secret"=>"secret", "url"=>tool_url,"privacy_level"=>"public"})
+            request.set_form_data({"name"=>tool_name, "consumer_key"=>consumer_key, "shared_secret"=>shared_secret, "url"=>tool_url,"privacy_level"=>"public"})
 
             response = http.request(request);
 
@@ -87,6 +91,81 @@ module LtiGoogleDocs
 
             puts "ADDED TOOL"
             puts response.body
+            return response.body
+        end
+        
+        def add_course_link(course, tool_name, tool_url, consumer_key, shared_secret, link_url, link_caption)
+            uri = URI.parse("#{@canvas_url}/api/v1/courses/#{course}/external_tools")
+            http = Net::HTTP.new(uri.host, uri.port)
+            request = Net::HTTP::Post.new(uri.request_uri)
+            
+            request["Authorization"] = "Bearer #{@access_token}"
+            puts request["Authorization"]
+            
+            #course_navigation = {"enabled"=> true, "default"> true, "url" => link_url, "text"=> link_caption, "visibility"=> "admins"}
+            request.set_form_data({"name"=> tool_name, "consumer_key"=>consumer_key, "shared_secret"=> shared_secret, "url"=>tool_url, "privacy_level"=>"public", "course_navigation[enabled]"=>true, "course_navigation[default]"=>true, "course_navigation[url]"=>link_url, "course_navigation[text]"=>link_caption, "course_navigation[visibility]"=>"admins"})
+            
+            response = http.request(request)
+            puts "ADDED COURSE LINK"
+            puts response.body
+            
+            if response.body["errors"]
+                #problems!
+                puts "AN ERROR OCCURRED DURING COURSE LINK ADDING...COURSE LINK NOT ADDED!"
+#                puts "OLD TOKEN: #{@access_token}"
+#                new_token = request_access_token!
+#                puts "NEW TOKEN: #{new_token}"
+#                @access_token = new_token
+            end
+            return response.body
+        end
+        
+        def add_module_to_course(course, name)
+            uri = URI.parse("#{@canvas_url}/api/v1/courses/#{course}/modules")
+            http = Net::HTTP.new(uri.host, uri.port)
+            
+            request = Net::HTTP::Post.new(uri.request_uri)
+            request["Authorization"] = "Bearer #{@access_token}"
+            
+            request.set_form_data({"module[name]" => name})
+            response = http.request(request)
+            puts "SENDING REQUEST TO CREATE MODULE"
+            puts response.body
+            
+            return response.body
+        end
+        
+        def add_tool_to_course_module(course, module_id, tool_id, label, tool_url)
+            uri = URI.parse("#{@canvas_url}/api/v1/courses/#{course}/modules/#{module_id}/items")
+            http = Net::HTTP.new(uri.host, uri.port)
+            puts "MAKING REQUEST TO: #{uri.request_uri}"
+            request = Net::HTTP::Post.new(uri.request_uri)
+            request["Authorization"] = "Bearer #{@access_token}"
+            request.set_form_data({"module_item[title]" => label,
+                                    "module_item[type]" => "ExternalTool",
+                                    "module_item[content_id]" =>tool_id,
+                                    "module_item[external_url]" => tool_url})
+            
+            puts "SENDING REQUEST TO ADD TOOL: #{label} TO MODULE"
+            response = http.request(request)
+            
+            puts response.body
+            return response.body
+            
+        end
+        
+        def remove_tool_from_course(course_id, tool_id)
+            uri = URI.parse("#{@canvas_url}/api/v1/courses/#{course_id}/external_tools/#{tool_id}")
+            
+            puts "REQUESTING TO REMOVE TOOL AT: #{uri}"
+            http = Net::HTTP.new(uri.host, uri.port)
+            request = Net::HTTP::Delete.new(uri.request_uri)
+            
+            request["Authorization"] = "Bearer #{@access_token}"
+            response = http.request(request)
+            
+            puts response.body
+            return response.body
         end
         
         def start_conversation(to, message)

@@ -63,6 +63,9 @@ app.controller('FactoryCtrl', ['$scope', '$http', '$modal', '$location', functio
     $scope.form = {};
     $scope.form.labViews = {};
     
+    $scope.course_id = angular.element("#course_id").val();
+    console.log("COURSE ID: "+$scope.course_id)
+    
     $scope.createLab = function() {
       console.log("CREATING LAB WITH TITLE: "+$scope.form.labName+ " TEMPLATE: "+$scope.form.templateFolderName+" WITH ID: "+$scope.form.templateID+" AND PARTICIPATION: "+$scope.form.participationModel);
         
@@ -71,13 +74,14 @@ app.controller('FactoryCtrl', ['$scope', '$http', '$modal', '$location', functio
             title: $scope.form.labName,
             folderName: $scope.form.templateFolderName,
             folderId: $scope.form.templateID,
-            participation: $scope.form.participationModel
+            participation: $scope.form.participationModel,
+            course_id: $scope.course_id
         };
-        
-        $http.post('labs/new', JSON.stringify(data)).success(function(data, status, headers, config) {
+        // /lti_google_docs/api/v2/labs/new
+        $http.post('/lti_google_docs/api/v2/courses/'+$scope.course_id+'/labs/new', JSON.stringify(data)).success(function(data, status, headers, config) {
             console.log("SUCCESSFUL CREATION!");
             console.log("RETRIEVING NEW LIST OF LABS!");
-            $http.get('labs/all')
+            $http.get('/lti_google_docs/api/v2/labs')
                 .success(function(data, status, headers, config) {
                     
                     $scope.form.labs = [];
@@ -96,7 +100,7 @@ app.controller('FactoryCtrl', ['$scope', '$http', '$modal', '$location', functio
     
     $scope.selectFolderFromDrive = function() {
       console.log("SELECTING!");  
-        
+        console.log($scope.itemsToChooseFrom);
         var FilePickerCtrl = function($scope, $modalInstance, itemsToChooseFrom, titlesToIDs) {
             //defer to rails to retrieve list of files.
             $scope.input = {
@@ -140,33 +144,57 @@ app.controller('FactoryCtrl', ['$scope', '$http', '$modal', '$location', functio
             //dismissed
         });
     };
+    //======
+    var progressBarModal;
+    function ShowProgressBar() {
+    
+        var ProgressBarCtrl = function($scope, $modalInstance) {  
+        };
+        
+        progressBarModal = $modal.open({
+            templateUrl: 'ProgressBar.html',
+            controller: ProgressBarCtrl
+        });
+        
+    }
+    
+    function hideProgressBar() {
+      progressBarModal.close();  
+    };
+    //======
     $scope.labs = [];
     
     $scope.itemsToChooseFrom = [];
     $scope.titlesToIDs = {};
-    
+    console.log("REQUESTING FILES FROM DRIVE...");
     //silently retrieve list of folders on google drive
-    $http({method: 'GET', url: 'launch/files'})
+    $http({method: 'GET', url: '/lti_google_docs/api/v2/drive_files'})
         .success(function(data, status, headers, config) {
-            console.log("SUCCEEDED!")
+            console.log("...FILES FROM DRIVE RETRIEVED!");
             for(var i in data) {
                 var file = data[i];
 
                 if(file.mimeType.indexOf('folder') != -1) {
+                    if($scope.itemsToChooseFrom.indexOf(file.title) != -1) {
+                        console.log("SKIPPING A DUPLICATE: "+file.title);
+                        continue;
+                        
+                    }
                     $scope.itemsToChooseFrom.push(file.title);
                     $scope.titlesToIDs[file.title] = file.id;
                 }
             }
+            console.log($scope.itemsToChooseFrom);
         })
         .error(function(data, status, headers, config) {
-                console.log("ERROR!");
+                console.log("ERROR RETRIEVING FILES FROM DRIVE!");
                 console.log(data);
                 console.log(status);
                 
     });
     
     //retrieve labs
-    $http.get('labs/all')
+    $http.get('/lti_google_docs/api/v2/labs')
         .success(function(data, status, headers, config) {
             console.log("GOT LABS: ");
             console.log(data);
@@ -176,20 +204,20 @@ app.controller('FactoryCtrl', ['$scope', '$http', '$modal', '$location', functio
     });
     
     //retrieve lab instances
-    $http.get('labs/instances/all').success(function(data, status, headers, config) {
+    $http.get('/lti_google_docs/api/v2/instances').success(function(data, status, headers, config) {
         console.log("GOT LAB INSTANCES: ");
         console.log(data);
         $scope.form.labInstances = data;
     }).error(function(data, status, headers, config) {
-        console.log("ERROR RETRIEVING LAB INSTANCES")
+        console.log("ERROR RETRIEVING LAB INSTANCES");
     });
     
     $scope.deleteLab = function(id) {
         console.log("YOU WANT TO DELETE LAB: "+id);
-        $http.delete('labs/'+id)
+        $http.delete('/lti_google_docs/api/v2/labs/'+id)
         .success(function(data, status, headers, config) {
             console.log("SUCCESS "+data);
-            $http.get('labs/all')
+            $http.get('/lti_google_docs/api/v2/labs')
                 .success(function(data, status, headers, config) {
                     $scope.form.labs = data;
                     
@@ -204,9 +232,9 @@ app.controller('FactoryCtrl', ['$scope', '$http', '$modal', '$location', functio
     
     $scope.deleteLabInstance = function(id) {
         console.log("YOU WANT TO DELETE LAB INSTANCE: "+id);
-        $http.delete("labs/instances/"+id).success(function(data, status, headers, config) {
+        $http.delete("/lti_google_docs/api/v2/instances/"+id).success(function(data, status, headers, config) {
             console.log("SUCCESSFUL DELETION ON SERVER")
-            $http.get('labs/instances/all').success(function(data, status, headers, config) {
+            $http.get('/lti_google_docs/api/v2/instances').success(function(data, status, headers, config) {
                 console.log("GOT LAB INSTANCES: ");
                 console.log(data);
                 $scope.form.labInstances = data;
@@ -218,11 +246,21 @@ app.controller('FactoryCtrl', ['$scope', '$http', '$modal', '$location', functio
         });
     };
     
+    $scope.createLabInstances = function(id) {
+        console.log("CREATING INSTANCES FOR LAB: "+id);
+        var data = {};
+        $http.post('/lti_google_docs/api/v2/labs/'+id+'/instances', JSON.stringify(data))
+            .success(function(lab_instances) {
+                console.log("LAB INSTANCES SUCCESSFULLY CREATED!");
+                console.log(lab_instances);
+            }).error(function(error) {
+                console.log("ERROR CREATING LAB INSTANCES!");
+                console.log(error);
+        });
+    };
+    
     $scope.labClick = function(lab) {
-//        console.log("CLICKED ON TABLE ROW!");
-//        console.log(lab);
-//        $scope.form.labViews[lab.id] = lab;
-        
+        ShowProgressBar();
         $http.get('labs/'+lab.id+'/instances')
             .success(function(data, status, headers, config) {
                 console.log("GOT LAB INSTANCES!");
@@ -231,9 +269,10 @@ app.controller('FactoryCtrl', ['$scope', '$http', '$modal', '$location', functio
                 if(data === "NEEDS AUTHENTICATION!") {
                     window.open('register/canvas', 'LTI_AUTHENTICATION', "width=800, height=600");   
                 }
-                
+                hideProgressBar();
             }).error(function(data, status, headers, config) {
                 console.log("ERROR RETRIEVING LAB INSTANCES");
+                hideProgressBar();
         });
 
     };
@@ -245,7 +284,6 @@ app.controller('FactoryCtrl', ['$scope', '$http', '$modal', '$location', functio
     
     $scope.successfulAuthentication = function() {
         console.log("AUTH SUCCESSFUL!");
-        
     };
     
     handleLoad($scope);
@@ -300,18 +338,7 @@ app.controller('AccountInfoCtrl', ['$scope', '$http', '$location', function($sco
                     
     console.log(angular.element("#client_id")[0].value);
     var client_id = angular.element("#client_id")[0].value;
-    $http.get("/lti_google_docs/api/v2/clients/"+client_id+"?query=true")
-            .success(function(data) {
-                console.log("SUCCESSFUL RETRIEVAL!");
-                console.log(data);
-                    
-                $scope.form = data;
-            })
-            .error(function(error) {
-                    
-                console.log("ERROR RETRIEVING ACCOUNT INFORMATION!");
-                console.log(error);
-            });
+
                     
     $scope.updateAccountInfo = function() {
         console.log("SENDING UPDATE REQUEST!");
@@ -328,4 +355,152 @@ app.controller('AccountInfoCtrl', ['$scope', '$http', '$location', function($sco
                     console.log(data);
                     });
     };
+    
+                    
+    $scope.successfulAuthentication = function() {
+        
+                    
+        $http.get("/lti_google_docs/api/v2/clients/"+client_id+"?query=true")
+        .success(function(data) {
+            console.log("SUCCESSFUL RETRIEVAL!");
+            console.log(data);
+
+            $scope.form = data;
+            $scope.authenticated = true;
+        })
+        .error(function(error) {
+
+            console.log("ERROR RETRIEVING ACCOUNT INFORMATION!");
+            console.log(error);
+        });
+                    
+    };
+    
+    if(handleLoad) {
+        handleLoad($scope);
+    }
+}]);
+                    
+app.controller('CourseInfoCtrl', ['$scope', '$http', function($scope, $http) {
+    $scope.courses = [];
+    $scope.working = true;
+    $http.get("/lti_google_docs/api/v2/courses?list=true")
+                    .success(function(courses) {
+                        console.log("SUCCESSFUL RETRIEVAL!");
+                        console.log(courses);
+                        $scope.courses = courses;
+                        $scope.working = false;
+                    }).error(function(error) {
+                        console.log("ERROR IN RETRIEVAL!");
+                       console.log(error);
+                        $scope.working=false;
+                    });
+                    
+
+    $scope.refreshModel = function() {
+        $scope.working = true;
+                    
+        $http.get("/lti_google_docs/api/v2/courses?list=true")
+                .success(function(courses) {
+                    console.log("SUCCESSFUL RETRIEVAL!");
+                    console.log(courses);
+                    $scope.courses = courses;
+                    $scope.working = false;
+                }).error(function(error) {
+                    console.log("ERROR IN RETRIEVAL!");
+                   console.log(error);
+                    $scope.working=false;
+                });            
+    }
+                    
+    
+    $scope.removeCourse = function(id) {
+        console.log("DELETING COURSE: "+id);                
+        $scope.working = true;
+        $http.delete("/lti_google_docs/api/v2/courses/"+id)
+            .success(function(data) {
+                console.log("SUCCESSFUL DELETION!");
+                console.log(data);
+                $scope.courses = data;
+                    $scope.working = false;
+            }).error(function(error){
+                console.log("ERROR DELETING ENTRY WITH ID: "+id);
+                console.log(error);
+                    $scope.working=false;
+            });                
+    }
+}]);
+                    
+app.controller('ReadyCourseCtrl', ['$scope', function($scope) {
+    
+    $scope.invalid_canvas_token = true;
+    $scope.successfulAuthentication = function() {
+      //heyooooo
+        console.log("SUCCESSFUL AUTHENTICATION!");
+    };
+             
+    handleLoad($scope);
+                    
+    $scope.requestAuthToken = function() {
+        window.open("/lti_google_docs/register/canvas", "LTI Authentication", "width=800, height=600");
+    };
+}]);
+                    
+app.controller('LabActivatorCtrl', ['$scope', '$http', function($scope, $http) {
+    var lab_id = angular.element("#lti-lab-id").val();
+    $scope.welcome_message = "LAB FROM HIDDEN INPUT: "+lab_id;
+
+    // POST TO "/lti_google_docs/api/v2/labs/ lab id /instances"
+    
+    
+    $scope.activateLab = function() {
+       var url  = "/lti_google_docs/api/v2/labs/"+lab_id+"/instances"
+        var data = {}
+        $http.post(url, JSON.stringify(data)).success(function(data) {
+            console.log("SUCCESSFUL ACTIVATION!");
+            console.log(data);
+        }).error(function(error) {
+            console.log("ERROR ACTIVATING LAB!");
+            console.log(error);
+        });
+    };
+                    
+    $scope.deleteAllInstances = function() {
+        var url = "/lti_google_docs/api/v2/instances"
+        $http.delete(url)
+            .success(function(data) {
+                console.log("SUCCESS DELETING ALL INSTANCES!");
+                console.log(data);
+            }).error(function(error) {
+                console.log("ERROR DELETING ALL INSTANCES");            
+        });
+    };
+                    
+}]);
+                    
+app.controller('StudentLabCtrl_v2', ['$scope', '$http', '$cookies', function($scope, $http, $cookies) {
+    $scope.welcome_message = "This is going to be the death of me --AND YOU TOO!!";
+    $scope.paths = [];
+    $scope.stuff = [1, 2, 3, 4, 5];
+                    
+    for(var i in $cookies) {
+        console.log(i+"->"+$cookies[i]);                
+    }
+    var files = angular.fromJson($cookies.shared_files);
+    console.log(files);
+    $scope.files = files;
+    for(var i in files.items) {
+        var item = files.items[i];
+        console.log(item);
+       // var path = "https://docs.google.com/document/d/"+item.id+"/edit?embedded=true";
+        var path = "https://docs.google.com/document/d/"+item.id+"/edit";
+        console.log(path);
+        $scope.paths.push(path);
+    }
+    console.log($scope.paths);
+}]);
+
+app.controller('NonStudentLabCtrl', ['$scope', '$http', '$cookies', function($scope, $http, $cookies) {
+    
+    $scope.welcome_message = "Hello, Designer! Welcome to your lab!";
 }]);

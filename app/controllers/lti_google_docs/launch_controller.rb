@@ -24,6 +24,8 @@ module LtiGoogleDocs
         puts "params from auth: #{params}"
         puts "SESSION IN AUTH: #{session[:userid]}"
         ps = {};
+      
+        puts "AUTHING! - Google redirect uri: #{google_client.authorization.redirect_uri}"
         ps[:redirect_uri] = google_client.authorization.redirect_uri
         ps[:client_id] = google_client.authorization.client_id
         ps[:scope] = "https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/userinfo.email"

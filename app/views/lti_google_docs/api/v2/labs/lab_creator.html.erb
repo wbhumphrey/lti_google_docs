@@ -1,10 +1,7 @@
-<%= javascript_include_tag "https://apis.google.com/js/client.js?" %>
-
-
 <div ng-app='LTI_GOOGLE_DOCS'>
     <div id='google-lti-body' class="container"  ng-controller='FactoryCtrl'>
         <!-- begin editable content -->
-
+            <input name="course_id" id="course_id" type="hidden" value="<%=@course_id %>">
             <tabset>
                 <tab heading="Create!">
                     <div class="jumbotron">
@@ -56,13 +53,15 @@
                     
                     <table class="table table-hover" ng-show="form.labs.length > 0">
                         
-                        <th>Lab Name</th><th>Template Folder</th><th>Participation</th>
+                        <th>Lab ID</th><th>Lab Name</th><th>Template Folder</th><th>Participation</th>
 
-                        <tr ng-repeat="lab in form.labs" ng-click="labClick(lab)" >
+                        <tr ng-repeat="lab in form.labs">
+                            <td>{{lab.id}}</td>
                             <td>{{lab.title}}</td>
                             <td>{{lab.folderName}}</td>
                             <td>{{lab.participation}}</td>
-                            <td><button type="button" class="close" aria-hidden="true" ng-click=deleteLab(lab.id)>&times</button></td>
+                            <td><button type="button" class="close" aria-hidden="true" tooltip="Create Lab Instances" ng-click="createLabInstances(lab.id)">&#43</button></td>
+                            <td><button type="button" class="close" aria-hidden="true" tooltip="Delete Lab" ng-click=deleteLab(lab.id)>&times</button></td>
 
                         </tr>
                     </table>

@@ -1,6 +1,7 @@
 require_dependency "lti_google_docs/application_controller"
 require '../../lib/lti_google_docs/Configuration'
 require 'yaml'
+
 module LtiGoogleDocs
   class LabsController < ApplicationController
   
@@ -17,7 +18,7 @@ module LtiGoogleDocs
           puts "INSIDE LAB START!"
 
           puts params.inspect
-          session[:userid] = params[:user_id]
+          session[:userid] = params[:custom_canvas_user_id]
           session[:current_course_id] = params["custom_canvas_course_id"]
           
           @access_token = session[:google_access_token]
@@ -45,7 +46,7 @@ module LtiGoogleDocs
               # 1.2) for every request, get the User associated with :for
               requests.each do |request|
                   student_user_id = request['for'];
-                  student = Users.find(userid: student_user_id);
+                  student = User.find_by(userid: student_user_id);
                   if student
                       #student exists
                       if recipient.email
@@ -75,7 +76,7 @@ module LtiGoogleDocs
               # 3) Get the children of the folder
                   files_in_folder = drive.list_children(folder_id)
               # 4) Show the files
-                  
+                  puts "FILES FOUND FOR THIS STUDENT: #{files_in_folder.inspect}"
                   cookies['files'] = JSON.generate(files_in_folder);
                   if request.query_parameters[:json]
                       cookies["super secret message"] = "eat more chicken"
@@ -156,4 +157,5 @@ module LtiGoogleDocs
         return @drive_client
       end
   end
+end
 end

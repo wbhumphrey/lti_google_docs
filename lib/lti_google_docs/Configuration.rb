@@ -7,13 +7,13 @@ module LtiGoogleDocs
             puts config.inspect
             @client_id = config['Google_Credentials']['client_id']
             @client_secret = config['Google_Credentials']['client_secret']
-            @redirect_uri = config['Google_Credentials']['redirect_uri']
+            @redirect_uri = "http://#{config['Google_Credentials']['redirect_ip']}:#{config['Google_Credentials']['redirect_port']}/lti_google_docs/register/google"
             @scopes = ["#{config['Google_Credentials']['scopes']}"]
 
            @canvas_client_id = config['Canvas_Credentials']['CANVAS_CLIENT_ID']
            @canvas_auth_url = config['Canvas_Credentials']['CANVAS_AUTH_URL']
            @canvas_client_secret = config['Canvas_Credentials']['CANVAS_CLIENT_SECRET']
-           @canvas_redirect_uri = config['Canvas_Credentials']['CANVAS_REDIRECT_URI']
+           @canvas_redirect_uri = "http://#{config['Canvas_Credentials']['CANVAS_REDIRECT_IP']}:#{config['Canvas_Credentials']['CANVAS_REDIRECT_PORT']}/lti_google_docs/register/confirmed2"
         end
 
         def client_id

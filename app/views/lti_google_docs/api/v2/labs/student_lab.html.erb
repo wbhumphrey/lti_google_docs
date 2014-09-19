@@ -1,0 +1,10 @@
+<div ng-app="LTI_GOOGLE_DOCS">
+    <div id="google-lti-body" class="container" ng-controller="StudentLabCtrl_v2">
+        {{welcome_message}}
+    
+        <div ng-repeat="path in paths">
+            <iframe style="resize: both; overflow:auto" src="{{path}}"></iframe>
+        </div>
+    
+    </div>
+</div>

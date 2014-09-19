@@ -11,7 +11,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140818210245) do
+ActiveRecord::Schema.define(version: 20140916161749) do
+
+  create_table "canvas_tools", force: true do |t|
+    t.text     "labid"
+    t.text     "canvas_tool_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "clients", force: true do |t|
     t.string   "client_name"
@@ -23,6 +30,14 @@ ActiveRecord::Schema.define(version: 20140818210245) do
     t.string   "client_secret"
     t.datetime "created_at"
     t.datetime "updated_at"
+  end
+
+  create_table "courses", force: true do |t|
+    t.text     "client_id"
+    t.text     "canvas_course_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string   "canvas_module_id"
   end
 
   create_table "lab_instances", force: true do |t|
@@ -40,6 +55,7 @@ ActiveRecord::Schema.define(version: 20140818210245) do
     t.string   "participation"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "course_id"
   end
 
   create_table "lti_google_docs_canvas_google_user_bridges", force: true do |t|

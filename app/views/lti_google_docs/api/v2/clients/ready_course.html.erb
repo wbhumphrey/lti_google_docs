@@ -1,0 +1,11 @@
+<div ng-app="LTI_GOOGLE_DOCS">
+    <div id="google-lti-body" class="container" ng-controller="ReadyCourseCtrl">
+        <%= @msg %>
+        asdf
+       
+        <div ng-show="invalid_canvas_token">
+            <button class="btn btn-lg btn-primary" ng-click="requestAuthToken()">Retry</button>
+        </div>
+        
+    </div>
+</div>

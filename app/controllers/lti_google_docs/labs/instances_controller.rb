@@ -103,7 +103,7 @@ module LtiGoogleDocs
                             li = LabInstance.create(labid: lab.id, studentid: result['id'], fileid: id_of_new_folder)
                             
                          end
-                        
+                
                         render json: LabInstance.where(labid: params[:id]).to_json
                         return
                     else

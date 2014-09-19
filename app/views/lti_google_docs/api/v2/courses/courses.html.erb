@@ -1,0 +1,31 @@
+<div ng-app="LTI_GOOGLE_DOCS">
+    <div id="google-lti-body" class="container" ng-controller="CourseInfoCtrl">
+        <table class="table table-hover" ng-hide="working">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Client ID</th>
+                    <th>Canvas Course ID</th>
+                    <th>Canvas Module ID</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="course in courses">
+                    <td>{{course.id}}</td>
+                    <td>{{course.client_id}}</td>
+                    <td>{{course.canvas_course_id}}</td>
+                    <td>{{course.canvas_module_id}}</td>
+                    <td><button type='close' class='close' aria-hidden="true" ng-click="removeCourse(course.id)">&times;</button></td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <br/>
+        <div ng-show="working" style="margin-left: auto; margin-right: auto; width: 1%">
+            <h1 class="fa fa-spinner fa-spin" ></h1>
+        </div>
+        
+        <button ng-hide="working" class="btn btn-lg btn-primary pull-right" ng-click="refreshModel()">Refresh!</button>
+    </div>
+</div>

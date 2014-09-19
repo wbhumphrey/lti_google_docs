@@ -55,6 +55,7 @@ module LtiGoogleDocs
         # We redirect to a page that automatically closes itself
         # since this is redirected to a popup.
 #        redirect_to "/lti_google_docs/register/confirmed"
+        puts "REDIRECTING TO /lti_google_docs/register/canvas!";
       redirect_to "/lti_google_docs/register/canvas"
     end
       
@@ -62,7 +63,7 @@ module LtiGoogleDocs
     def canvas
         ps = {}
         ps[:client_id] = 2
-        ps[:redirect_uri] = 'http://127.0.0.1:31337/lti_google_docs/register/confirmed2'
+        ps[:redirect_uri] = "http://#{get_my_ip_address}:#{request.port}/lti_google_docs/register/confirmed2"
         ps[:response_type] = 'code'
 
         query = ps.to_query

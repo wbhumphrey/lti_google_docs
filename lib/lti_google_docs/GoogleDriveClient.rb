@@ -154,7 +154,7 @@ module LtiGoogleDocs
         end
 
         def share_file_on_drive(id, email)
-            new_permission = @drive.permission.insert.request_schema.new({
+            new_permission = @drive.permissions.insert.request_schema.new({
                 'value' => 'email',
                 'type' => 'user',
                 'role' => 'writer'

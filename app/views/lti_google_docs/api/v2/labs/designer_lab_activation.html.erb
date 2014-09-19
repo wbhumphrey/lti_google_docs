@@ -1,0 +1,11 @@
+<div ng-app="LTI_GOOGLE_DOCS">
+    <div id="google-lti-body" class="container" ng-controller="LabActivatorCtrl">
+        {{welcome_message}} LAB: <%= @lab_id %>
+        
+        <br/>
+        <button type="button" class="btn btn-large btn-primary" ng-click="activateLab()">Activate Lab <%=@lab_id%></button>
+        <br/>
+        <button type="button" class="btn btn-large btn-success" ng-click="deleteAllInstances()">Delete All Instances</button>
+        <input id="lti-lab-id" type="hidden" value="<%= @lab_id %>">
+    </div>
+</div>

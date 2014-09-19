@@ -1,6 +1,12 @@
 <div ng-app="LTI_GOOGLE_DOCS">
     <div id="google-lti-body" class="container" ng-controller="AccountInfoCtrl">
-        <div class="jumbotron">
+        
+        <div class="jumbotron" ng-show="!authenticated">
+            <h1 class="lead">Waiting for authentication <i class="fa fa-spinner fa-spin"></i></h1>
+        
+        </div>
+        
+        <div class="jumbotron" ng-hide="!authenticated">
             <h1>Account Information</h1>
             <div class="form-group row">
                 <div class="col-lg-5">
@@ -66,7 +72,7 @@
             
             <button type="button" class="btn btn-lg btn-primary pull-right" ng-click="updateAccountInfo()">Update!</button>
             <br/>
-            <h1><i class="fa fa-spinner fa-spin"></i></h1>
+            
             
             <%= hidden_field_tag 'client_id', @c.id%>
         </div>
