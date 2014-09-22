@@ -60,7 +60,7 @@ module LtiGoogleDocs
 
         if state_object["needs_canvas"] != 'true'
             "PUTS CANVAS TOKEN NOT NEEDED, NO NEED TO REDIRECT THERE!";
-            render text: "google success!"
+            render "google_token_confirmation"
             return
         end
     
