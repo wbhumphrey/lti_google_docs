@@ -42,10 +42,6 @@ module LtiGoogleDocs::Api::V2
                 puts "CONTINUE WITH LAB CREATOR AS NORMAL...";
             end
             
-            
-            
-            
-            
             custom_canvas_course_id = params[:custom_canvas_course_id]
             if !custom_canvas_course_id
                 puts "NO CUSTOM CANVAS COURSE ID FOUND IN PARAMETERS. PERHAPS THE LTI TOOL IS CONFIGURED FOR LESS THAN PUBLIC ACCESS?"
@@ -63,16 +59,41 @@ module LtiGoogleDocs::Api::V2
             end
             
             puts "SENDING COURSE ID: #{@course_id}"
-            puts "CANVAS ACCESS TOKEN WITHIN POST TO LABS#CREATE -> #{session[:canvas_access_token]}"
+            
+            
+            #TODO: GENERATE API TOKEN, PUT IN USERS TABLE WITH THIS USER ID
+            # @api_token = ... ?
             render "lab_creator"
         end
         
         def new
             puts "INSIDE NEW"
+            
+            api_token = request.headers["LTI_API_TOKEN"]
+            if !api_token
+                puts 'Missing API token in LTI_API_TOKEN header'
+                render json: { error: 'Missing API token in LTI_API_TOKEN header'}.to_json, status: :bad_request
+                return
+            end
+            
+            u = User.find_by(api_token: api_token)
+            if !u
+                puts "USER NOT FOUND FOR GIVEN API TOKEN: #{api_token}"
+                render json: {error: 'Invalid API token'}.to_json, status: :bad_request
+                return
+            end
+            
+            #TODO: check user variable to see if api_token has expired
+            
+            
+            
+            
+            
+            
             if request.post?
                 if !params["course_id"]
                     puts "NO COURSE ID FOUND, FAILING GRACEFULLY"
-                    render text: "No course id, no new lab."
+                    render json: {error: "No course id, no new lab."}.to_json, status: :bad_request
                     return;
                 end
 
@@ -84,7 +105,11 @@ module LtiGoogleDocs::Api::V2
                     google_drive_folder_id = params[:folderId]
                     participation = params[:participation]
 
-                    lab = Lab.create(title: title, folderName: folderName, folderId: google_drive_folder_id, participation: participation, course_id: params["course_id"])
+                    lab = Lab.create(title: title,
+                                    folderName: folderName,
+                                    folderId: google_drive_folder_id,
+                                    participation: participation,
+                                    course_id: params["course_id"])
                     
                     course_id = params["course_id"]
                     canvas_course = Course.find_by(id: course_id)
@@ -94,7 +119,7 @@ module LtiGoogleDocs::Api::V2
                     client = Client.find_by(id: client_id)
                     key = client.client_id
                     secret = client.client_secret
-                    canvas_client.access_token = session[:canvas_access_token]
+                    canvas_client.access_token = u.canvas_access_token
                     url = "http://#{get_my_ip_address}:#{request.port}/lti_google_docs/api/v2/labs/#{lab.id}/launch"
                     tool_added = JSON.parse(canvas_client.add_tool_to_course_with_credentials(canvas_course_id, "(LAB) #{title}", url, key, secret))
                     puts tool_added.inspect
@@ -132,6 +157,22 @@ module LtiGoogleDocs::Api::V2
         end
         
         def destroy
+            api_token = request.headers["LTI_API_TOKEN"]
+            if !api_token
+                puts 'Missing API token in LTI_API_TOKEN header'
+                render json: { error: 'Missing API token in LTI_API_TOKEN header'}.to_json, status: :bad_request
+                return
+            end
+            
+            u = User.find_by(api_token: api_token)
+            if !u
+                puts "USER NOT FOUND FOR GIVEN API TOKEN: #{api_token}"
+                render json: {error: 'Invalid API token'}.to_json, status: :bad_request
+                return
+            end
+            
+            #TODO: check user variable to see if api_token has expired
+
             lab_id = params["id"]
             
             if !lab_id
@@ -148,7 +189,7 @@ module LtiGoogleDocs::Api::V2
                     tool = CanvasTools.find_by(labid: lab_id)
                     
                     if tool
-                        canvas_client.access_token = session[:canvas_access_token]
+                        canvas_client.access_token = u.canvas_access_token
                         #remove tool from canvas
                         puts "REMOVING LTI FROM CANVAS"
                         canvas_client.remove_tool_from_course(course, tool.canvas_tool_id)
@@ -168,6 +209,7 @@ module LtiGoogleDocs::Api::V2
             render json: {}, status: :no_content
         end
         
+        # POST as an LTI from Canvas
         def launch
             puts params.inspect
             
@@ -193,7 +235,7 @@ module LtiGoogleDocs::Api::V2
                     lab_instance = LabInstance.find_by(labid: @lab_id, studentid: student_id)
                     if lab_instance
                     # validate google token
-                        validate_google_access_token(session)
+                        validate_google_access_token(User.find_by(canvas_user_id: student_id))
                     # retrieve shared_folder_id from labinstance
                         shared_folder_id = lab_instance.fileid
                     # retrieve list of files from shared folder
@@ -221,20 +263,20 @@ module LtiGoogleDocs::Api::V2
             end
         end
         
-        def validate_google_access_token(session)
-            if is_google_access_token_valid?(session[:google_access_token])
+        def validate_google_access_token(user)
+            if is_google_access_token_valid?(user.google_access_token)
                 #token is valid
             else
                 #token is not valid, we need to refresh it.
                 #start by retrieving user credentials for the user of this session
                 puts "TOKEN IS INVALID, REFRESHING TOKEN"
-                user = User.find_by(id: session[:userid])
+
                 if !user
                     #user does not exist
                     puts "TRYING TO REFRESH GOOGLE ACCESS TOKEN, BUT NO USER IS ASSOCIATED WITH SESSION"
                 else
                     #user exists
-                    session[:google_access_token] = retrieve_access_token(user.refresh)
+                    user.google_access_token = retrieve_access_token(user.refresh)
                     puts "ACCESS TOKEN REFRESHED"
                 end
             end
