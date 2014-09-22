@@ -8,8 +8,6 @@ module LtiGoogleDocs
 
     #The initial loading point for our LTI
     def index
-        puts "INSIDE INDEX!"
-        
         render template: 'lti_google_docs/launch/error', tp: tool_provider if tool_provider.lti_msg
     end
       
@@ -37,10 +35,6 @@ module LtiGoogleDocs
     end
         
     def factory
-    end
-        
-    def files
-        hello
     end
   end
 end

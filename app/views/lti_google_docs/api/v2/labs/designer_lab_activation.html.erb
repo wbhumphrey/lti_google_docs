@@ -1,5 +1,6 @@
 <div ng-app="LTI_GOOGLE_DOCS">
     <div id="google-lti-body" class="container" ng-controller="LabActivatorCtrl">
+        <input type="hidden" id="api-token" value="<%=@api_token%>">
         {{welcome_message}} LAB: <%= @lab_id %>
         
         <br/>

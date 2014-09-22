@@ -57,7 +57,10 @@ var c = app.controller('MainCtrl', ['$scope', '$http', function($scope, $http) {
 
 app.controller('FactoryCtrl', ['$scope', '$http', '$modal', '$location', function($scope, $http, $modal, $location) {
     $scope.successfulAuthentication = function() {
-        console.log("AUTH SUCCESSFUL!");
+
+        $scope.api_token = angular.element("#api_token").val();
+        console.log("FOUND API TOKEN: "+$scope.api_token);
+        
         $scope.nothing = "no text";
         $scope.asdfxxx = "no-lab";
 
@@ -169,7 +172,7 @@ app.controller('FactoryCtrl', ['$scope', '$http', '$modal', '$location', functio
         $scope.titlesToIDs = {};
         console.log("REQUESTING FILES FROM DRIVE...");
         //silently retrieve list of folders on google drive
-        $http({method: 'GET', url: '/lti_google_docs/api/v2/drive_files'})
+        $http({method: 'GET', url: '/lti_google_docs/api/v2/drive_files', headers: {"LTI_API_TOKEN": $scope.api_token}})
             .success(function(data, status, headers, config) {
                 console.log("...FILES FROM DRIVE RETRIEVED!");
                 for(var i in data) {
@@ -195,7 +198,7 @@ app.controller('FactoryCtrl', ['$scope', '$http', '$modal', '$location', functio
         });
 
         //retrieve labs
-        $http.get('/lti_google_docs/api/v2/labs')
+        $http.get('/lti_google_docs/api/v2/labs', {headers: {"LTI_API_TOKEN": $scope.api_token}})
             .success(function(data, status, headers, config) {
                 console.log("GOT LABS: ");
                 console.log(data);
@@ -205,7 +208,7 @@ app.controller('FactoryCtrl', ['$scope', '$http', '$modal', '$location', functio
         });
 
         //retrieve lab instances
-        $http.get('/lti_google_docs/api/v2/instances').success(function(data, status, headers, config) {
+        $http.get('/lti_google_docs/api/v2/instances', {headers: {"LTI_API_TOKEN": $scope.api_token}}).success(function(data, status, headers, config) {
             console.log("GOT LAB INSTANCES: ");
             console.log(data);
             $scope.form.labInstances = data;
@@ -215,10 +218,10 @@ app.controller('FactoryCtrl', ['$scope', '$http', '$modal', '$location', functio
 
         $scope.deleteLab = function(id) {
             console.log("YOU WANT TO DELETE LAB: "+id);
-            $http.delete('/lti_google_docs/api/v2/labs/'+id)
+            $http.delete('/lti_google_docs/api/v2/labs/'+id, {headers: {"LTI_API_TOKEN": $scope.api_token}})
             .success(function(data, status, headers, config) {
                 console.log("SUCCESS "+data);
-                $http.get('/lti_google_docs/api/v2/labs')
+                $http.get('/lti_google_docs/api/v2/labs', {headers: {"LTI_API_TOKEN": $scope.api_token}})
                     .success(function(data, status, headers, config) {
                         $scope.form.labs = data;
 
@@ -233,9 +236,9 @@ app.controller('FactoryCtrl', ['$scope', '$http', '$modal', '$location', functio
 
         $scope.deleteLabInstance = function(id) {
             console.log("YOU WANT TO DELETE LAB INSTANCE: "+id);
-            $http.delete("/lti_google_docs/api/v2/instances/"+id).success(function(data, status, headers, config) {
+            $http.delete("/lti_google_docs/api/v2/instances/"+id, {headers: {"LTI_API_TOKEN": $scope.api_token}}).success(function(data, status, headers, config) {
                 console.log("SUCCESSFUL DELETION ON SERVER")
-                $http.get('/lti_google_docs/api/v2/instances').success(function(data, status, headers, config) {
+                $http.get('/lti_google_docs/api/v2/instances', {headers: {"LTI_API_TOKEN": $scope.api_token}}).success(function(data, status, headers, config) {
                     console.log("GOT LAB INSTANCES: ");
                     console.log(data);
                     $scope.form.labInstances = data;
@@ -250,7 +253,7 @@ app.controller('FactoryCtrl', ['$scope', '$http', '$modal', '$location', functio
         $scope.createLabInstances = function(id) {
             console.log("CREATING INSTANCES FOR LAB: "+id);
             var data = {};
-            $http.post('/lti_google_docs/api/v2/labs/'+id+'/instances', JSON.stringify(data))
+            $http.post('/lti_google_docs/api/v2/labs/'+id+'/instances', JSON.stringify(data), {headers: {"LTI_API_TOKEN": $scope.api_token}})
                 .success(function(lab_instances) {
                     console.log("LAB INSTANCES SUCCESSFULLY CREATED!");
                     console.log(lab_instances);
@@ -262,7 +265,7 @@ app.controller('FactoryCtrl', ['$scope', '$http', '$modal', '$location', functio
 
         $scope.labClick = function(lab) {
             ShowProgressBar();
-            $http.get('labs/'+lab.id+'/instances')
+            $http.get('labs/'+lab.id+'/instances', {headers: {"LTI_API_TOKEN": $scope.api_token}})
                 .success(function(data, status, headers, config) {
                     console.log("GOT LAB INSTANCES!");
                     console.log(data);
@@ -282,8 +285,7 @@ app.controller('FactoryCtrl', ['$scope', '$http', '$modal', '$location', functio
             console.log("REMOVING LAB VIEW: "+id);
             delete $scope.form.labViews[id];
         }
-    
-    
+
     };
     
     $scope.successfulAuthentication();
@@ -448,15 +450,17 @@ app.controller('ReadyCourseCtrl', ['$scope', function($scope) {
                     
 app.controller('LabActivatorCtrl', ['$scope', '$http', function($scope, $http) {
     var lab_id = angular.element("#lti-lab-id").val();
+    
     $scope.welcome_message = "LAB FROM HIDDEN INPUT: "+lab_id;
-
+    $scope.api_token = angular.element("#api-token").val();
+    console.log("FOUND API TOKEN: "+$scope.api_token);
     // POST TO "/lti_google_docs/api/v2/labs/ lab id /instances"
     
     
     $scope.activateLab = function() {
        var url  = "/lti_google_docs/api/v2/labs/"+lab_id+"/instances"
         var data = {}
-        $http.post(url, JSON.stringify(data)).success(function(data) {
+        $http.post(url, JSON.stringify(data), {headers: {"LTI_API_TOKEN":$scope.api_token}}).success(function(data) {
             console.log("SUCCESSFUL ACTIVATION!");
             console.log(data);
         }).error(function(error) {
@@ -467,7 +471,7 @@ app.controller('LabActivatorCtrl', ['$scope', '$http', function($scope, $http) {
                     
     $scope.deleteAllInstances = function() {
         var url = "/lti_google_docs/api/v2/instances"
-        $http.delete(url)
+        $http.delete(url, {headers: {"LTI_API_TOKEN": $scope.api_token}})
             .success(function(data) {
                 console.log("SUCCESS DELETING ALL INSTANCES!");
                 console.log(data);

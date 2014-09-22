@@ -4,7 +4,7 @@ require_dependency "../../lib/lti_google_docs/GoogleDriveClient"
 module LtiGoogleDocs::Api::V2
     class InstancesController < LtiGoogleDocs::ApplicationController
         def index
-            api_token = request.headers["LTI_API_TOKEN"]
+            api_token = request.headers["HTTP_LTI_API_TOKEN"]
             if !api_token
                 puts 'Missing API token in LTI_API_TOKEN header'
                 render json: { error: 'Missing API token in LTI_API_TOKEN header'}.to_json, status: :bad_request

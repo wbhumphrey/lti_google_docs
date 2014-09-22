@@ -5,6 +5,25 @@ module LtiGoogleDocs::Api::V2
     class LabsController < LtiGoogleDocs::ApplicationController
         
         def index
+            api_token = request.headers["HTTP_LTI_API_TOKEN"]
+            if !api_token
+                puts 'Missing API token in LTI_API_TOKEN header'
+                render json: { error: 'Missing API token in LTI_API_TOKEN header'}.to_json, status: :bad_request
+                return
+            end
+            
+            u = User.find_by(api_token: api_token)
+            if !u
+                puts "USER NOT FOUND FOR GIVEN API TOKEN: #{api_token}"
+                render json: {error: 'Invalid API token'}.to_json, status: :bad_request
+                return
+            end
+            
+            #TODO: check user variable to see if api_token has expired
+
+            
+            
+            
             labs = Lab.all
             render json: labs
         end
@@ -19,7 +38,7 @@ module LtiGoogleDocs::Api::V2
             @canvas_server_address = params[:custom_canvas_api_domain]
             # get User entry if it exists
             
-            if !custom_canvas_user_id || custom_canvas_user_id == nil
+            if !@custom_canvas_user_id || @custom_canvas_user_id == nil
                 render text: "No canvas course id was sent. Maybe the person who installed the LTI did not specify public access?"
                 return
             end
@@ -31,15 +50,14 @@ module LtiGoogleDocs::Api::V2
                 @need_google_token = true
                 @need_canvas_token = true
             else 
+                validate_google_access_token(lti_user)
                 @need_google_token = !lti_user.google_access_token
                 @need_canvas_token = !lti_user.canvas_access_token
             end
         
             if @need_google_token || @need_canvas_token
                 render "retrieve_resource_tokens"
-                return;
-            else
-                puts "CONTINUE WITH LAB CREATOR AS NORMAL...";
+                return
             end
             
             custom_canvas_course_id = params[:custom_canvas_course_id]
@@ -63,6 +81,9 @@ module LtiGoogleDocs::Api::V2
             
             #TODO: GENERATE API TOKEN, PUT IN USERS TABLE WITH THIS USER ID
             # @api_token = ... ?
+            @api_token = generateToken
+            lti_user.api_token = @api_token
+            lti_user.save
             render "lab_creator"
         end
         
@@ -84,12 +105,7 @@ module LtiGoogleDocs::Api::V2
             end
             
             #TODO: check user variable to see if api_token has expired
-            
-            
-            
-            
-            
-            
+
             if request.post?
                 if !params["course_id"]
                     puts "NO COURSE ID FOUND, FAILING GRACEFULLY"
@@ -220,6 +236,38 @@ module LtiGoogleDocs::Api::V2
             
             # sanity check, if no user @ custom_canvas_user_id exists OR params[:custom_canvas_user_id] is not present, return error code
             
+            
+            @canvas_user_id = params[:custom_canvas_user_id]
+            @canvas_server_address = params[:custom_canvas_api_domain]
+            # get User entry if it exists
+            
+            if !@canvas_user_id
+                render text: "No canvas course id was sent. Maybe the person who installed the LTI did not specify public access?"
+                return
+            end
+            
+            
+            u = User.find_by(canvas_user_id: params[:custom_canvas_user_id])
+            
+            if !u
+                # tell the client we need both the google access token and the canvas token
+                @need_google_token = true
+                @need_canvas_token = true
+            else 
+                validate_google_access_token(lti_user)
+                @need_google_token = !lti_user.google_access_token
+                @need_canvas_token = !lti_user.canvas_access_token
+            end
+        
+            if @need_google_token || @need_canvas_token
+                render "retrieve_resource_tokens"
+                return;
+            else
+                puts "CONTINUE WITH LAB CREATOR AS NORMAL...";
+            end
+            
+            
+            
             instances = LabInstance.where(labid: @lab_id)
             # if any lab instance with this lab id exists...
             if !instances.blank?
@@ -228,6 +276,9 @@ module LtiGoogleDocs::Api::V2
             
                     # retrieve all students names
                     #show instructor/designer view
+                    @api_token = generateToken
+                    u.api_token = @api_token
+                    u.save
                     render "designer_lab"
                 # if i AM a student
                 else
@@ -244,6 +295,11 @@ module LtiGoogleDocs::Api::V2
                     # put generated object in cookie with key 'shared_files'
                         cookies["shared_files"] = JSON.generate(shared_files_json)
                     # show 'student_lab'
+                        
+                        
+                        @api_token = generateToken
+                        u.api_token = @api_token
+                        u.save
                         render "student_lab"
                     else
                         #no lab instance exists for this student. Was the student enrolled after lab creation?
@@ -254,6 +310,10 @@ module LtiGoogleDocs::Api::V2
                 if !tool_provider.student?
                 # if I am not a student
                     #show designer_lab_activation
+                    
+                    @api_token = generateToken
+                    u.api_token = @api_token
+                    u.save
                     render "designer_lab_activation"
                 else
                 # if I AM a student
@@ -277,6 +337,7 @@ module LtiGoogleDocs::Api::V2
                 else
                     #user exists
                     user.google_access_token = retrieve_access_token(user.refresh)
+                    user.save
                     puts "ACCESS TOKEN REFRESHED"
                 end
             end
