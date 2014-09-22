@@ -38,16 +38,6 @@ module LtiGoogleDocs
             if request.post?
                 render tool_provider.lti_msg unless !tool_provider.lti_msg
             end
-            
-#            handle_access_token_state(params, session)
-#            
-#            if request.post?
-#               if params["custom_canvas_api_domain"]
-#                   @canvas_domain = params["custom_canvas_api_domain"]
-#                else
-#                    @canvas_domain = "No such url";
-#                end
-#            end
         end
 
         def set_default_headers
@@ -158,11 +148,6 @@ module LtiGoogleDocs
             return true
         end
     
-        def is_access_token_valid?
-            if !session[:google_access_token] then return false end
-            return is_google_access_token_valid?(session[:google_access_token])
-        end
-    
         def retrieve_access_token(refresh_token)
             google_client.authorization.refresh_token = refresh_token
 #            google_client.authorization.additional_parameters = {:access_type => 'offline'}
@@ -172,66 +157,6 @@ module LtiGoogleDocs
             google_client.authorization.fetch_access_token!
 
             google_client.authorization.access_token
-        end
-            
-        def is_canvas_access_token_valid?(session)
-            
-            puts "IS CANVAS TOKEN: #{session[:canvas_access_token]} VALID: #{!session[:canvas_access_token]}"
-            
-            if !session[:canvas_access_token] then return false end
-                
-            #TODO: ACTUALLY CHECK THAT ACCESS TOKEN HAS NOT EXPIRED.
-            return true
-        end
-                  
-        def handle_access_token_state(params, session)
-           puts "CHECKING ACCESS TOKEN STATE FOR BOTH GOOGLE AND CANVAS!"
-            
-            #check for Google Access Token in session
-            if is_access_token_valid?
-                #yes => proceed as normal
-                puts "GOOGLE ACCESS TOKEN FOUND, NOTHING TO SEE HERE"
-                @access_token = session[:google_access_token]
-            else
-                #no => check User for refresh token given userid
-                puts "NO GOOGLE ACCESS TOKEN FOUND...LOOKING FOR GOOGLE REFRESH TOKEN"
-                @u = User.find_by(userid: session[:userid])
-                if !@u || !@u.refresh
-                    #no => redirect with popup and so forth...
-                    # This is handled by keeping @access_token set to nil.
-                    # When the page is preparing to be served, it will check for @access_token
-                    # and when it doesn't find it, it will insert javascript code that
-                    # will trigger a popup to our :auth action down below this action.
-                    puts "NO GOOGLE REFRESH TOKEN FOUND, SENDING POPUP"
-                else
-                    #yes => retrieve access token, store in session, proceed as normal
-                    # if something bad happens here, it's likely a bad refresh token
-                    # so we will set the user's refresh token to nil, set the access token
-                    # to nil and re-authenticate/authorize
-                    begin
-                        puts "GOOGLE REFRESH TOKEN FOUND, RETRIEVING GOOGLE ACCESS TOKEN!"
-                        refreshToken = @u.refresh
-                        @access_token = retrieve_access_token(refreshToken)
-                        puts "GOOGLE ACCESS TOKEN RETRIEVED: #{@access_token} ... STORING IN SESSION"
-                        session[:google_access_token] = @access_token
-                    rescue
-                        puts "SOMETHING BAD HAPPENED..."
-                        puts "REMOVING CURRENT GOOGLE REFRESH TOKEN..."
-                        User.find_by(userid: session[:userid]).update_attributes(:refresh => nil)
-
-                        @access_token = nil
-                    end
-                end
-            end
-
-            if is_canvas_access_token_valid?(session)
-                puts "CANVAS ACCESS TOKEN FOUND, NOTHING TO SEE HERE: #{session[:canvas_access_token]}"
-                @canvas_access_token = session[:canvas_access_token]
-            else
-                puts "CANVAS ACCESS TOKEN NOT FOUND, TELLING POPUP TO APPEAR!"
-                #TODO: WHAT HAPPENS WHEN ACCESS TOKEN IS INVALID?
-                #WE WON'T SET @canvas_access_token ERGO, MAKING THE POPUP APPEAR FOR CANVAS ONLY
-            end
         end
       
         def get_my_ip_address
