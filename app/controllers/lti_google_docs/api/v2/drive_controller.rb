@@ -41,9 +41,10 @@ module LtiGoogleDocs::Api::V2
                 puts "RETRIEVAL FAILED, REFRESHING ACCESS TOKEN"
                 refreshToken = u.refresh
                 accessToken = retrieve_access_token(refreshToken)
-                puts "RETRIEVED ACCESS TOKEN: #{accessToken} ... PUTTING IN SESSION"
-                session[:google_access_token] = accessToken
-                
+                puts "RETRIEVED ACCESS TOKEN: #{accessToken} ... PUTTING IN Users TABLE"
+                u.google_access_token = access_token
+                u.save
+
                 google_client.authorization.access_token = accessToken
                 drive = google_client.discovered_api('drive', 'v2')
                 puts "TRYING AGAIN TO RETRIEVE LIST OF FILES"
