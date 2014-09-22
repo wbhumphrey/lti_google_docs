@@ -15,7 +15,8 @@ module LtiGoogleDocs::Api::V2
             custom_canvas_user_id = params["custom_canvas_user_id"]
             
             # FOR THIS CONTROLLER, WE NEED BOTH A CANVAS ACCESS TOKEN *AND* A GOOGLE ACCESS TOKEN
-            
+            @canvas_user_id = params[:custom_canvas_user_id]
+            @canvas_server_address = params[:custom_canvas_api_domain]
             # get User entry if it exists
             
             if !custom_canvas_user_id || custom_canvas_user_id == nil
@@ -30,8 +31,8 @@ module LtiGoogleDocs::Api::V2
                 @need_google_token = true
                 @need_canvas_token = true
             else 
-                @need_google_token = defined?(lti_user.google_access_token)
-                @need_canvas_token = defined?(lti_user.canvas_access_token)
+                @need_google_token = !lti_user.google_access_token
+                @need_canvas_token = !lti_user.canvas_access_token
             end
         
             if @need_google_token || @need_canvas_token
@@ -245,7 +246,5 @@ module LtiGoogleDocs::Api::V2
             
             return @drive_client
         end
-    
-    
     end
 end

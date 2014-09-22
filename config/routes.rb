@@ -63,6 +63,7 @@ LtiGoogleDocs::Engine.routes.draw do
             resources :labs do
                 resources :instances, shallow: true
                 post 'launch', to: 'labs#launch'
+                
             end
 
             resources :instances

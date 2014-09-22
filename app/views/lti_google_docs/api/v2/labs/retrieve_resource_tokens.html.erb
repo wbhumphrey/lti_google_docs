@@ -1,1 +1,27 @@
-retrieving...
+<div ng-app="LTI_GOOGLE_DOCS">
+    <div class="container" id="google-lti_body" ng-controller="RetrieveResourceTokensCtrl">
+        
+        <div class="jumbotron">
+            <h1>We need your help!</h1>
+            <p>We've noticed that we have not quite gotten access to your Google Drive or Canvas account. In order for us to automatically copy files/folders from your Drive account with students and other teachers, as well as automatically add links to our module, we need you to allow us access. Please click the button below. Doing so will bring up a popup window that may ask you to allow access to Google Drive, Canvas, or both. If you are not currently logged into either of these services, you may also need to enter your login credentials. Once access to one (or both) is allowed, the popup window will disappear and you should reload the page.</p>
+        </div>
+    
+        <button class="btn btn-lg btn-primary pull-right" ng-click="showRequestPopup()">Allow Access!</button>
+    
+        <br/>
+        <h3>Server: <%= @canvas_server_address %></h3>
+        <br/>
+        <h3>USER ID: <%= @canvas_user_id %></h3>
+        <br/>
+        <h3>Need Google Token: <%= @need_google_token%></h3>
+        <br/>
+        <h3>Need Canvas Token: <%= @need_canvas_token%></h3>
+    
+    
+        <input id="canvas-server-address" type="hidden" value="<%= @canvas_server_address %>">
+        <input id="canvas-user-id" type="hidden" value="<%= @canvas_user_id %>">
+        <input id="need-google-token" type="hidden" value="<%= @need_google_token%>">
+        <input id="need-canvas-token" type="hidden" value="<%= @need_canvas_token%>">
+    
+    </div>
+</div>

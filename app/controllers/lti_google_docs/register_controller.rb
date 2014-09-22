@@ -24,34 +24,46 @@ module LtiGoogleDocs
         
         puts "REFRESH TOKEN: #{client.authorization.refresh_token}"
         puts "ACCESS TOKEN: #{client.authorization.access_token}"
-        puts "USER ID: #{session[:userid]}"
-        session[:google_access_token] = client.authorization.access_token  
-      
-        u = User.find_by(userid: session[:userid])
+       
+        puts "CREATING STATE OBJECT!";
+        state_object = {}
+        csv_key_value_pairs = params[:state]
+        key_value_pairs = csv_key_value_pairs.split(",")
+        key_value_pairs.each do |x|
+            tokens = x.split('=')
+             key = tokens[0]
+             value = tokens[1]
+            state_object[key] = value
+        end        
+        puts "STATE OBJECT: "
+        puts state_object.inspect
         
-        # if user exists
+        puts "USER ID: #{state_object["canvas_user_id"]}"
+        u = User.find_by(canvas_user_id: state_object["canvas_user_id"])
         if u
-            # check for google email address
-            if u.email
-                # update user with new refresh token
-                u.update_attributes(:refresh => client.authorization.refresh_token)
-            else
-                # get email address
-                info = get_google_user_info
-                puts "UPDATING USER TO EMAIL: #{info['email']}"
-            
-                # update user with new refresh token AND email address
-                u.update_attributes(:refresh => client.authorization.refresh_token, :email => info['email'])
-            end
+            u.refresh = client.authorization.refresh_token
+            u.google_access_token = client.authorization.access_token
+            u.save
         else
-            #get google email address
-            info = get_google_user_info
-            puts "GOING TO CREATE NEW USER WITH EMAIL: #{info['email']}"
-            
-            #create new user with refresh token and email address
-            User.create(userid: session[:userid], refresh: client.authorization.refresh_token, email: info['email'])
+            u = User.create(canvas_user_id: state_object["canvas_user_id"],
+                            refresh: client.authorization.refresh_token,
+                            google_access_token: client.authorization.access_token)
         end
 
+        # check for google email address
+        if !u.email
+            # update user with new refresh token
+            info = get_google_user_info
+            puts "UPDATING USER EMAIL TO: #{info['email']}"
+            u.update_attributes(:refresh => client.authorization.refresh_token, :email => info['email'])
+        end
+
+        if state_object["needs_canvas"] != 'true'
+            "PUTS CANVAS TOKEN NOT NEEDED, NO NEED TO REDIRECT THERE!";
+            render text: "google success!"
+            return
+        end
+    
         # We redirect to a page that automatically closes itself
         # since this is redirected to a popup.
 #        redirect_to "/lti_google_docs/register/confirmed"

@@ -524,3 +524,23 @@ app.controller('RequestConfirmedCtrl', ['$scope', function($scope) {
         window.close();
     };
 }]);
+                    
+app.controller('RetrieveResourceTokensCtrl', ['$scope', '$window', function($scope, $window) {
+
+    var canvas_server_address = angular.element("#canvas-server-address").val();
+    var canvas_user_id = angular.element("#canvas-user-id").val();
+    var we_need_google_token = angular.element("#need-google-token").val();
+    var we_need_canvas_token = angular.element("#need-canvas-token").val();
+                    
+    console.log("FOUND SERVER: "+canvas_server_address);
+    console.log("FOUND USER ID: "+canvas_user_id);
+    console.log("NEED GOOGLE TOKEN: "+we_need_google_token);
+    console.log("NEED CANVAS TOKEN: "+we_need_canvas_token);
+    
+    $scope.showRequestPopup = function() {
+        var output = $window.open("/lti_google_docs/launch/auth?canvas_server_address="+canvas_server_address+"&canvas_user_id="+canvas_user_id+"&needs_canvas="+we_need_canvas_token, "LTI Authentication", "with=800, height=600");
+        console.log("WINDOW OPENED!");
+        console.log(output);
+    }
+                    
+}]);
