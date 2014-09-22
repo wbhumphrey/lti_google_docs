@@ -3,9 +3,7 @@ require_dependency "lti_google_docs/application_controller"
 module LtiGoogleDocs::Api::V2
     class DriveController < LtiGoogleDocs::ApplicationController
         
-        def index
-            
-            
+        def index 
             api_token = request.headers["LTI_API_TOKEN"]
             if !api_token
                 puts 'Missing API token in LTI_API_TOKEN header'

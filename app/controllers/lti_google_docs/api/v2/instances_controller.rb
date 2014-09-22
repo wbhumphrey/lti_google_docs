@@ -4,6 +4,22 @@ require_dependency "../../lib/lti_google_docs/GoogleDriveClient"
 module LtiGoogleDocs::Api::V2
     class InstancesController < LtiGoogleDocs::ApplicationController
         def index
+            api_token = request.headers["LTI_API_TOKEN"]
+            if !api_token
+                puts 'Missing API token in LTI_API_TOKEN header'
+                render json: { error: 'Missing API token in LTI_API_TOKEN header'}.to_json, status: :bad_request
+                return
+            end
+            
+            u = User.find_by(api_token: api_token)
+            if !u
+                puts "USER NOT FOUND FOR GIVEN API TOKEN: #{api_token}"
+                render json: {error: 'Invalid API token'}.to_json, status: :bad_request
+                return
+            end
+            
+            #TODO: check user variable to see if api_token has expired
+            
             instances = LabInstance.all
             
             render json: instances.to_json
@@ -11,6 +27,22 @@ module LtiGoogleDocs::Api::V2
         
         def create
             puts params.inspect
+            
+            api_token = request.headers["LTI_API_TOKEN"]
+            if !api_token
+                puts 'Missing API token in LTI_API_TOKEN header'
+                render json: { error: 'Missing API token in LTI_API_TOKEN header'}.to_json, status: :bad_request
+                return
+            end
+            
+            u = User.find_by(api_token: api_token)
+            if !u
+                puts "USER NOT FOUND FOR GIVEN API TOKEN: #{api_token}"
+                render json: {error: 'Invalid API token'}.to_json, status: :bad_request
+                return
+            end
+
+            #TODO: check user variable to see if api_token has expired
             
             lab_id = params[:lab_id]
             result = {}
@@ -27,7 +59,7 @@ module LtiGoogleDocs::Api::V2
                 
                 #retrieve students enrolled in course
                 puts "RETRIEVING STUDENTS ENROLLED IN COURSE"
-                canvas_client.access_token = session[:canvas_access_token]
+                canvas_client.access_token = u.canvas_access_token
                 lti_course_id = lab.course_id
                 lti_course = Course.find_by(id: lti_course_id)
                 students = canvas_client.list_students_in_course(lti_course.canvas_course_id)
@@ -46,7 +78,7 @@ module LtiGoogleDocs::Api::V2
                             #we have students, so we know we'll need to be creating some files on their drive account
                             
                             #validate our access token from google
-                            validate_google_access_token(session)
+                            validate_google_access_token(u)
                             
                             #get id of file to copy, associated with lab
                             id_of_file_to_copy = lab.folderId
@@ -68,7 +100,7 @@ module LtiGoogleDocs::Api::V2
                                     #create new folder for student
                                     id_of_new_folder = drive.create_folder(title)
                                     #share file (or try to)
-                                    drive.share_file(student['id'], session[:userid], id_of_new_folder)
+                                    drive.share_file(student['id'], u.canvas_user_id, id_of_new_folder)
                                     
                                     #now that the folder is created, lets populate it with copied files
                                 
@@ -82,7 +114,7 @@ module LtiGoogleDocs::Api::V2
                                         drive.copy_file(file.id, id_of_new_folder, file_title)
                                         
                                         #try to share the file with the student
-                                        drive.share_file(student['id'], session[:userid], file.id)
+                                        drive.share_file(student['id'], u.canvas_user_id, file.id)
                                     end
                                     
                                     #now we can create the lab instance
@@ -144,20 +176,20 @@ module LtiGoogleDocs::Api::V2
         end
     
         #======= UTILITIES
-        def validate_google_access_token(session)
-            if is_google_access_token_valid?(session[:google_access_token])
+        def validate_google_access_token(user)
+            if is_google_access_token_valid?(user.google_access_token)
                 #token is valid
             else
                 #token is not valid, we need to refresh it.
                 #start by retrieving user credentials for the user of this session
                 puts "TOKEN IS INVALID, REFRESHING TOKEN"
-                user = User.find_by(id: session[:userid])
                 if !user
                     #user does not exist
-                    puts "TRYING TO REFRESH GOOGLE ACCESS TOKEN, BUT NO USER IS ASSOCIATED WITH SESSION"
+                    puts "TRYING TO REFRESH GOOGLE ACCESS TOKEN, BUT NO USER IS ASSOCIATED WITH REQUEST"
                 else
                     #user exists
-                    session[:google_access_token] = retrieve_access_token(user.refresh)
+                    user.google_access_token = retrieve_access_token(user.refresh)
+                    user.save
                     puts "ACCESS TOKEN REFRESHED"
                 end
             end
@@ -169,8 +201,5 @@ module LtiGoogleDocs::Api::V2
             
             return @drive_client
         end
-        
-        
-        
     end
 end
