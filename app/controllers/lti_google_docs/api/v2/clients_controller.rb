@@ -79,10 +79,10 @@ module LtiGoogleDocs::Api::V2
             
             ### REMOVE THIS AFTER TESTING ###
             
-            @canvas_user_id = params[:custom_canvas_user_id]
-            @canvas_server_address = params[:custom_canvas_api_domain]
-            render "retrieve_canvas_token"
-            return
+#            @canvas_user_id = params[:custom_canvas_user_id]
+#            @canvas_server_address = params[:custom_canvas_api_domain]
+#            render "retrieve_canvas_token"
+#            return
             
             ### REMOVE ABOVE AFTER TESTING ###
             
@@ -125,8 +125,6 @@ module LtiGoogleDocs::Api::V2
                 else
                     # create course and associate it with this client
                     course = Course.create(client_id: client.id, canvas_course_id: course_id)
-                    
-                    puts "CURRENT CANVAS TOKEN BEFORE COURSE LINK ADD: #{session[:canvas_access_token]}"
                     # create "Lab Creator (Step 2)" tool entry into Canvas
                     canvas_client.access_token = lti_user.canvas_access_token
                     canvas_client.add_course_link(course_id,
@@ -187,26 +185,6 @@ module LtiGoogleDocs::Api::V2
         # GET show the web page for registration
         def new
             render "registration"
-        end
-        
-        def auth
-            puts "params from auth: #{params}"
-            puts "SESSION IN AUTH: #{session[:userid]}"
-            ps = {};
-    
-            puts "REDIRECT URI TO BE SENT: #{google_client.authorization.redirect_uri}"
-            ps[:redirect_uri] = google_client.authorization.redirect_uri
-            ps[:client_id] = google_client.authorization.client_id
-            ps[:scope] = "https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/userinfo.email"
-            ps[:immediate] = false
-            ps[:approval_prompt] = 'force'
-            ps[:response_type] = 'code'
-            ps[:access_type] = 'offline'
-            ps[:state] = '0xDEADBEEF'
-
-            query = ps.to_query
-            puts query
-            redirect_to "https://accounts.google.com/o/oauth2/auth?#{query}"
         end
     end
 end

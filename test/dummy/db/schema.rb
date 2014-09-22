@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140922152445) do
+ActiveRecord::Schema.define(version: 20140922203751) do
 
   create_table "canvas_tools", force: true do |t|
     t.text     "labid"
@@ -89,6 +89,7 @@ ActiveRecord::Schema.define(version: 20140922152445) do
     t.string   "email"
     t.string   "google_access_token"
     t.string   "canvas_access_token"
+    t.string   "api_token"
   end
 
 end

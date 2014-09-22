@@ -286,7 +286,8 @@ app.controller('FactoryCtrl', ['$scope', '$http', '$modal', '$location', functio
     
     };
     
-    handleLoad($scope);
+    $scope.successfulAuthentication();
+    //handleLoad($scope);
 }]);
 
 var i = app.controller('LabInstancesCtrl', ['$scope', '$http', '$modal', function($scope, $http, $modal) {

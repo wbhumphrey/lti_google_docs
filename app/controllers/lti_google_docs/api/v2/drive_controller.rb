@@ -2,11 +2,31 @@ require_dependency "lti_google_docs/application_controller"
 
 module LtiGoogleDocs::Api::V2
     class DriveController < LtiGoogleDocs::ApplicationController
+        
         def index
-            puts "RETRIEVING FILE LIST FROM GOOGLE DRIVE"
             
+            
+            api_token = request.headers["LTI_API_TOKEN"]
+            if !api_token
+                puts 'Missing API token in LTI_API_TOKEN header'
+                render json: { error: 'Missing API token in LTI_API_TOKEN header'}.to_json, status: :bad_request
+                return
+            end
+            
+            u = User.find_by(api_token: api_token)
+            if !u
+                puts 
+                render json: {error: 'Invalid API token'}.to_json, status: :bad_request
+                return
+            end
+            
+            if !u.google_acces_token
+                render json: {error: 'Missing google_access_token'}.to_json, status: :bad_request
+            end
+            
+            puts "RETRIEVING FILE LIST FROM GOOGLE DRIVE"
             #here we need to retrieve the drive files associated with the currently logged in user.
-            google_client.authorization.access_token = session[:google_access_token]
+            google_client.authorization.access_token = u.google_access_token
             drive = google_client.discovered_api('drive', 'v2')
             api_result = google_client.execute(
                 :api_method => drive.files.list,
@@ -19,7 +39,7 @@ module LtiGoogleDocs::Api::V2
                 result.concat(files.items)
             else
                 puts "RETRIEVAL FAILED, REFRESHING ACCESS TOKEN"
-                refreshToken = User.find_by(userid: session[:userid]).refresh
+                refreshToken = u.refresh
                 accessToken = retrieve_access_token(refreshToken)
                 puts "RETRIEVED ACCESS TOKEN: #{accessToken} ... PUTTING IN SESSION"
                 session[:google_access_token] = accessToken

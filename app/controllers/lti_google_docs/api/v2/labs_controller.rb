@@ -46,7 +46,7 @@ module LtiGoogleDocs::Api::V2
             
             
             
-            
+            custom_canvas_course_id = params[:custom_canvas_course_id]
             if !custom_canvas_course_id
                 puts "NO CUSTOM CANVAS COURSE ID FOUND IN PARAMETERS. PERHAPS THE LTI TOOL IS CONFIGURED FOR LESS THAN PUBLIC ACCESS?"
                 @course_id = -1

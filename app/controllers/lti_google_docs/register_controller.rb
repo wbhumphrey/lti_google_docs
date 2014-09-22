@@ -68,7 +68,7 @@ module LtiGoogleDocs
         # since this is redirected to a popup.
 #        redirect_to "/lti_google_docs/register/confirmed"
         puts "REDIRECTING TO /lti_google_docs/register/canvas!";
-      redirect_to "/lti_google_docs/register/canvas"
+      redirect_to "/lti_google_docs/register/canvas?domain=#{state_object['canvas_server_address']}&canvas_user_id=#{state_object['canvas_user_id']}"
     end
       
     
