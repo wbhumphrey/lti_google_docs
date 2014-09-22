@@ -65,17 +65,22 @@ module LtiGoogleDocs
         ps[:client_id] = 2
         ps[:redirect_uri] = "http://#{get_my_ip_address}:#{request.port}/lti_google_docs/register/confirmed2"
         ps[:response_type] = 'code'
-
+        ps[:state] = params[:canvas_user_id];
         query = ps.to_query
-        url = URI.parse("#{CANVAS_AUTH_URL}?#{query}")
+        url = URI.parse("http://#{params[:domain]}/login/oauth2/auth?#{query}")
 
+        puts "REDIRECTING TO URL: #{url}"
         redirect_to "#{url}"
     end
         
     # This action is redirected to from Google's OAuth2 popup so that
     # we can retrieve OAuth tokens for Canvas
     def confirmed2
+        puts "CONFIRMED 2!!!!!!!!"
+        puts params.inspect
+        
         code = params[:code]
+        canvas_user_id = params[:state]
         puts "RETRIEVAL CODE: #{code}"
         client = canvas_client 
 
@@ -84,13 +89,19 @@ module LtiGoogleDocs
         client.request_access_token!
         puts "ACCESS TOKEN: #{client.access_token}"
         
-        session[:canvas_access_token] = client.access_token
-        puts client.list_courses
-        puts client.list_students_in_course(1)
-        # THE BELOW COMMAND IS VERIFIED TO WORK
-        #client.add_tool_to_course(1, "Test Tool", CANVAS_REDIRECT_URI)
-        
-        render text: "ok"
+        canvas_user = User.find_by(canvas_user_id: canvas_user_id)
+        if !canvas_user
+            # create user
+            canvas_user = User.create(canvas_user_id: canvas_user_id, canvas_access_token: client.access_token)
+        else
+            # update user
+            canvas_user.canvas_access_token = client.access_token
+            canvas_user.save
+        end
+
+        @confirmation_message = "Canvas Access Token has been saved! Thank you for your cooperation! Your window will close in 5 seconds. If you wish to close it sooner, click the green button below. You will need to reload the page, once this window closes."
+
+        render "canvas_token_retrieval_confirmation";
     end
     
     def index

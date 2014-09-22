@@ -1,0 +1,19 @@
+<div ng-app="LTI_GOOGLE_DOCS">
+    <div class="container" id="google-lti-body" ng-controller="RetrieveCanvasTokenCtrl">
+        <h1>Your action is needed!</h1>
+        <div class="jumbotron">
+            We've' noticed this is the first time you've used the LTI! In order to make life easy, we need you to allow our tool to have access to your Canvas account. Doing so will allow us to automatically create modules and course links. Please click the button below when you are ready. A popup window will appear from Canvas asking you to confirm that you are allowing access. You may also have to enter your credentials, but hopefully not. Once access has been allowed, the popup window will disappear and you should reload the page.
+        </div>
+        <br/>
+        <button class="btn btn-lg btn-primary pull-right" ng-click="showRequestPopup()">Allow Access!</button>
+        
+<!--
+        <h3>Server: <%= @canvas_server_address %></h3>
+        <br/>
+        <h3>USER ID: <%= @canvas_user_id %></h3>
+        
+-->
+        <input id="canvas-server-address" type="hidden" value="<%= @canvas_server_address %>">
+        <input id="canvas-user-id" type="hidden" value="<%= @canvas_user_id %>">
+    </div>
+</div>

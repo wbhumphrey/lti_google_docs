@@ -9,10 +9,42 @@ module LtiGoogleDocs::Api::V2
             render json: labs
         end
         
-        #Entry point to LTI from Canvas
+        # POST as an LTI from Canvas
         def create
             # get custom_canvas_course_id from params
-            custom_canvas_course_id = params["custom_canvas_course_id"]
+            custom_canvas_user_id = params["custom_canvas_user_id"]
+            
+            # FOR THIS CONTROLLER, WE NEED BOTH A CANVAS ACCESS TOKEN *AND* A GOOGLE ACCESS TOKEN
+            
+            # get User entry if it exists
+            
+            if !custom_canvas_user_id || custom_canvas_user_id == nil
+                render text: "No canvas course id was sent. Maybe the person who installed the LTI did not specify public access?"
+                return
+            end
+            
+            lti_user = User.find_by(canvas_user_id: custom_canvas_user_id)
+            
+            if !lti_user
+                # tell the client we need both the google access token and the canvas token
+                @need_google_token = true
+                @need_canvas_token = true
+            else 
+                @need_google_token = defined?(lti_user.google_access_token)
+                @need_canvas_token = defined?(lti_user.canvas_access_token)
+            end
+        
+            if @need_google_token || @need_canvas_token
+                render "retrieve_resource_tokens"
+                return;
+            else
+                puts "CONTINUE WITH LAB CREATOR AS NORMAL...";
+            end
+            
+            
+            
+            
+            
             
             if !custom_canvas_course_id
                 puts "NO CUSTOM CANVAS COURSE ID FOUND IN PARAMETERS. PERHAPS THE LTI TOOL IS CONFIGURED FOR LESS THAN PUBLIC ACCESS?"
@@ -30,6 +62,7 @@ module LtiGoogleDocs::Api::V2
             end
             
             puts "SENDING COURSE ID: #{@course_id}"
+            puts "CANVAS ACCESS TOKEN WITHIN POST TO LABS#CREATE -> #{session[:canvas_access_token]}"
             render "lab_creator"
         end
         

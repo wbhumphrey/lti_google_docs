@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140916161749) do
+ActiveRecord::Schema.define(version: 20140922152445) do
 
   create_table "canvas_tools", force: true do |t|
     t.text     "labid"
@@ -30,6 +30,7 @@ ActiveRecord::Schema.define(version: 20140916161749) do
     t.string   "client_secret"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "lti_access_token"
   end
 
   create_table "courses", force: true do |t|
@@ -81,11 +82,13 @@ ActiveRecord::Schema.define(version: 20140916161749) do
   end
 
   create_table "users", force: true do |t|
-    t.string   "userid"
+    t.string   "canvas_user_id"
     t.string   "refresh"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "email"
+    t.string   "google_access_token"
+    t.string   "canvas_access_token"
   end
 
 end

@@ -7,25 +7,6 @@
   <%= csrf_meta_tags %>
 </head>
 <body>
-<%= javascript_tag do %>
-    var handleLoad = function($scope) {
-    <% if !@access_token %>
-        console.log("LAUNCHING WINDOW FOR GOOGLE AUTH");
-        window.open('/lti_google_docs/launch/auth', 'LTI Authentication', "height=400, width=400")
-        window.success_auth = $scope.successfulAuthentication;
-    <% else %>
-        console.log("GOOGLE AUTH PRESENT")
-        <% if !@canvas_access_token %>
-            console.log("LAUNCHING WINDOW FOR CANVAS AUTH")
-            window.open('<%= @canvas_domain %>/lti_google_docs/register/canvas', 'LTI Authentication', "width=800, height=600")
-        <% else %>
-        console.log("CANVAS AUTH PRESENT")
-            $scope.successfulAuthentication();
-            window.close();
-        <% end %>
-    <% end %>
-    }
-<% end %>
 <%= yield %>
 <h1>Application layout</h1>
 </body>

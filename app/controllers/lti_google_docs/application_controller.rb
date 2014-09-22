@@ -3,6 +3,10 @@ require_dependency '../../lib/lti_google_docs/Configuration'
 require_dependency '../../lib/lti_google_docs/CanvasClient'
 
 require 'socket'
+require 'securerandom'
+require 'openssl'
+require 'base64'
+require 'json'
 
 module LtiGoogleDocs
     class ApplicationController < ActionController::Base
@@ -11,38 +15,39 @@ module LtiGoogleDocs
         before_filter :cors_preflight_check
         after_filter :cors_set_access_control_headers
 
-        def test_before
-            puts "JUST MAKING SURE THIS GETS EXECUTED EACH TIME!"
-            if !@google_client_id
-                conf = Configuration.new
-#                puts "APP CONTROLLER CONFIG: #{conf.inspect}"
-                @google_client_id = conf.client_id
-                @google_client_secret = conf.client_secret
-               
-                puts "#CONFIG GOOGLE REDIRECT URI: #{conf.redirect_uri}"
-                @google_redirect_uri = conf.redirect_uri
-                @google_scopes = conf.scopes
-                @google_scopes.push("https://www.googleapis.com/auth/userinfo")
+        def retrieve_configuration
+            conf = Configuration.new
+            @google_client_id = conf.client_id
+            @google_client_secret = conf.client_secret
 
-                @canvas_auth_url = conf.canvas_auth_url
-                @canvas_client_secret = conf.canvas_client_secret
-                @canvas_client_id = conf.canvas_client_id
-                @canvas_redirect_uri = conf.canvas_redirect_uri
-            end
+            #puts "#CONFIG GOOGLE REDIRECT URI: #{conf.redirect_uri}"
+            @google_redirect_uri = conf.redirect_uri
+            @google_scopes = conf.scopes
+            @google_scopes.push("https://www.googleapis.com/auth/userinfo")
+
+            @canvas_auth_url = conf.canvas_auth_url
+            @canvas_client_secret = conf.canvas_client_secret
+            @canvas_client_id = conf.canvas_client_id
+            @canvas_redirect_uri = conf.canvas_redirect_uri
+        end
+        
+        def test_before
+            retrieve_configuration
             
-            
-            puts "\nTEST_BEFORE PARAMS: #{params.inspect}"
-            puts "\nTEST_BEFORE SESSION: #{session.inspect}"
-            
-            handle_access_token_state(params, session)
-            
+            #render lti error message unless there was no error
             if request.post?
-               if params["custom_canvas_api_domain"]
-                   @canvas_domain = params["custom_canvas_api_domain"]
-                else
-                    @canvas_domain = "No such url";
-                end
+                render tool_provider.lti_msg unless !tool_provider.lti_msg
             end
+            
+#            handle_access_token_state(params, session)
+#            
+#            if request.post?
+#               if params["custom_canvas_api_domain"]
+#                   @canvas_domain = params["custom_canvas_api_domain"]
+#                else
+#                    @canvas_domain = "No such url";
+#                end
+#            end
         end
 
         def set_default_headers
@@ -169,7 +174,10 @@ module LtiGoogleDocs
             google_client.authorization.access_token
         end
             
-        def is_canvas_access_token_valid?
+        def is_canvas_access_token_valid?(session)
+            
+            puts "IS CANVAS TOKEN: #{session[:canvas_access_token]} VALID: #{!session[:canvas_access_token]}"
+            
             if !session[:canvas_access_token] then return false end
                 
             #TODO: ACTUALLY CHECK THAT ACCESS TOKEN HAS NOT EXPIRED.
@@ -177,28 +185,16 @@ module LtiGoogleDocs
         end
                   
         def handle_access_token_state(params, session)
-           puts "CHECKING ACCESS TOKEN STATE!"
-            puts "PARAMS IN HANDLE_ACCESS_TOKEN_STATE: #{params.inspect}"    
-            
-           puts "CUSTOM CANVAS USER ID PARAM WITH SYMBOL: #{params[:custom_canvas_user_id]}"
-           puts "CUSTOM CANVAS USER ID PARAM WITH STRING: #{params['custom_canvas_user_id']}"
-           puts "ID PARAM WITH SYMBOL: #{params[:id]}"
-            
-            if session[:custom_canvas_user_id]
-                puts "NO REASON TO RE SET session[:userid]!"
-            else
-                puts "\n*\n*\nSETTING session[:userid] to: #{params[:custom_canvas_user_id]}"
-                session[:userid] = params[:custom_canvas_user_id]
-            end
+           puts "CHECKING ACCESS TOKEN STATE FOR BOTH GOOGLE AND CANVAS!"
             
             #check for Google Access Token in session
             if is_access_token_valid?
                 #yes => proceed as normal
-                puts "ACCESS TOKEN FOUND, NOTHING TO SEE HERE"
+                puts "GOOGLE ACCESS TOKEN FOUND, NOTHING TO SEE HERE"
                 @access_token = session[:google_access_token]
             else
                 #no => check User for refresh token given userid
-                puts "NO ACCESS TOKEN FOUND...LOOKING FOR REFRESH TOKEN"
+                puts "NO GOOGLE ACCESS TOKEN FOUND...LOOKING FOR GOOGLE REFRESH TOKEN"
                 @u = User.find_by(userid: session[:userid])
                 if !@u || !@u.refresh
                     #no => redirect with popup and so forth...
@@ -206,21 +202,21 @@ module LtiGoogleDocs
                     # When the page is preparing to be served, it will check for @access_token
                     # and when it doesn't find it, it will insert javascript code that
                     # will trigger a popup to our :auth action down below this action.
-                    puts "NO REFRESH TOKEN FOUND, SENDING POPUP"
+                    puts "NO GOOGLE REFRESH TOKEN FOUND, SENDING POPUP"
                 else
                     #yes => retrieve access token, store in session, proceed as normal
                     # if something bad happens here, it's likely a bad refresh token
                     # so we will set the user's refresh token to nil, set the access token
                     # to nil and re-authenticate/authorize
                     begin
-                        puts "REFRESH TOKEN FOUND, RETRIEVING ACCESS TOKEN!"
+                        puts "GOOGLE REFRESH TOKEN FOUND, RETRIEVING GOOGLE ACCESS TOKEN!"
                         refreshToken = @u.refresh
                         @access_token = retrieve_access_token(refreshToken)
-                        puts "ACCESS TOKEN RETRIEVED: #{@access_token} ... STORING IN SESSION"
+                        puts "GOOGLE ACCESS TOKEN RETRIEVED: #{@access_token} ... STORING IN SESSION"
                         session[:google_access_token] = @access_token
                     rescue
                         puts "SOMETHING BAD HAPPENED..."
-                        puts "REMOVING CURRENT REFRESH TOKEN..."
+                        puts "REMOVING CURRENT GOOGLE REFRESH TOKEN..."
                         User.find_by(userid: session[:userid]).update_attributes(:refresh => nil)
 
                         @access_token = nil
@@ -228,10 +224,11 @@ module LtiGoogleDocs
                 end
             end
 
-            if is_canvas_access_token_valid?
+            if is_canvas_access_token_valid?(session)
                 puts "CANVAS ACCESS TOKEN FOUND, NOTHING TO SEE HERE: #{session[:canvas_access_token]}"
                 @canvas_access_token = session[:canvas_access_token]
             else
+                puts "CANVAS ACCESS TOKEN NOT FOUND, TELLING POPUP TO APPEAR!"
                 #TODO: WHAT HAPPENS WHEN ACCESS TOKEN IS INVALID?
                 #WE WON'T SET @canvas_access_token ERGO, MAKING THE POPUP APPEAR FOR CANVAS ONLY
             end
@@ -242,5 +239,41 @@ module LtiGoogleDocs
             Socket::gethostname
         end
 
+        ################## PASSWORD HASHING TO BE RE-FACTORED LATER ################
+        
+        PBKDF2_ITERATIONS = 20000;
+        SALT_BYTE_SIZE = 64;
+        HASH_BYTE_SIZE = 64;
+        
+        HASH_SECTIONS = 4;
+        SECTION_DELIMITER = ":";
+        ITERATIONS_INDEX = 1;
+        SALT_INDEX = 2;
+        HASH_INDEX = 3;
+        
+        def generateToken
+           return SecureRandom.base64(SALT_BYTE_SIZE)
+        end
+        
+        def createHash(password)
+            #create random salt
+            salt = SecureRandom.base64(SALT_BYTE_SIZE)
+            
+            #run algorithm
+            pbkdf2 = OpenSSL::PKCS5::pbkdf2_hmac_sha1(password, salt, PBKDF2_ITERATIONS, HASH_BYTE_SIZE)
+            
+            #return hash of the format: sha1:1000:DEADBEEF:CAFEBABE
+            return ['sha1', PBKDF2_ITERATIONS, salt, Base64.encode64(pbkdf2)].join(SECTION_DELIMITER)
+        end
+        
+        def validatePassword(password, correctHash)
+            params = correctHash.split(PBKDF2_ITERATIONS)
+            return false if params.length != HASH_SECTIONS
+            
+            pbkdf2 = Base64.decode64(params[HASH_INDEX])
+            testHash = OpenSSL::PKCS5::pbkdf2_hmac_sha1(password, params[SALT_INDEX], params[ITERATIONS_INDEX].to_i, pbkdf2.length)
+            
+            return pbkdf2 == testHash
+        end
     end
 end

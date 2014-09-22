@@ -16,23 +16,26 @@ module LtiGoogleDocs::Api::V2
         
         #GET show an entry in the clients table with a specific id
         def show
+            #retrieve entry from clients table
             @c = Client.find_by(id: params["id"])
-
-            puts @c.inspect
             
+            #if no entry exists for that id, return an entry with -1
             if !@c
                 @c = {id: -1}
             end
             
+            #further, if the url says to use json, return the entry as json
             if params["query"]
                 render json: @c
             else
+                #otherwise, render the account_info page
                 render "account_info"
             end
         end
         
-        # POST add an entry to the clients table
+        # POST add an entry to the clients table, from outside of Canvas.
         def create
+            
             puts "CREATING NEW CLIENT!"
             puts params.inspect
             
@@ -60,8 +63,40 @@ module LtiGoogleDocs::Api::V2
             render json: @client
         end
         
+        # POST as an LTI from within Canvas
         def ready_course
             
+            # THIS IS AN LTI ENTRY POINT,
+            # WE WILL GET ALL SORTS OF CANVAS INFO HERE.
+            
+            
+            if !params[:custom_canvas_user_id] || params[:custom_canvas_user_id] == nil
+                render text: "No canvas user id was sent. Maybe the person who installed the LTI did not specify public access?"
+                return
+            end
+            
+            lti_user = User.find_by(canvas_user_id: params[:custom_canvas_user_id])
+            
+            ### REMOVE THIS AFTER TESTING ###
+            
+            @canvas_user_id = params[:custom_canvas_user_id]
+            @canvas_server_address = params[:custom_canvas_api_domain]
+            render "retrieve_canvas_token"
+            return
+            
+            ### REMOVE ABOVE AFTER TESTING ###
+            
+            if !lti_user
+                #tell the client to retrieve the canvas token from the canvas server
+                @canvas_user_id = params[:custom_canvas_user_id]
+                @canvas_server_address = params[:custom_canvas_api_domain]
+                render "retrieve_canvas_token"
+                return
+            end
+            # continue as normal...
+            puts "CONTINUE AS NORMAL..."
+            canvas_access_token = lti_user.canvas_access_token    
+
             @ready_course = true;
             
             puts "PREPARING COURSE FOR INTEGRATION!"
@@ -80,8 +115,6 @@ module LtiGoogleDocs::Api::V2
                 
                 #check for existing course with these two ids
                 course = Course.find_by(client_id: client.id, canvas_course_id: course_id)
-                    #if course already exists...
-                puts course
                 if course
                     puts "COURSE EXISTS: #{course.inspect}"
                 
@@ -95,7 +128,7 @@ module LtiGoogleDocs::Api::V2
                     
                     puts "CURRENT CANVAS TOKEN BEFORE COURSE LINK ADD: #{session[:canvas_access_token]}"
                     # create "Lab Creator (Step 2)" tool entry into Canvas
-                    canvas_client.access_token = session[:canvas_access_token]
+                    canvas_client.access_token = lti_user.canvas_access_token
                     canvas_client.add_course_link(course_id,
                                                 "Lab Creator (Step 2)",
                                                 "www.google.com",
@@ -128,8 +161,7 @@ module LtiGoogleDocs::Api::V2
                 render text: "Nothing to see here..."
             end
         end
-        
-        
+
         # PUT/PATCH update a client with a specific id
         def update
             puts "INSIDE UPDATE!";
@@ -175,43 +207,6 @@ module LtiGoogleDocs::Api::V2
             query = ps.to_query
             puts query
             redirect_to "https://accounts.google.com/o/oauth2/auth?#{query}"
-        end
-        
-        ################## PASSWORD HASHING TO BE RE-FACTORED LATER ################
-        
-        PBKDF2_ITERATIONS = 20000;
-        SALT_BYTE_SIZE = 64;
-        HASH_BYTE_SIZE = 64;
-        
-        HASH_SECTIONS = 4;
-        SECTION_DELIMITER = ":";
-        ITERATIONS_INDEX = 1;
-        SALT_INDEX = 2;
-        HASH_INDEX = 3;
-        
-        def generateToken
-           salt = SecureRandom.base64(SALT_BYTE_SIZE);
-        end
-        
-        def createHash(password)
-            #create random salt
-            salt = SecureRandom.base64(SALT_BYTE_SIZE);
-            
-            #run algorithm
-            pbkdf2 = OpenSSL::PKCS5::pbkdf2_hmac_sha1(password, salt, PBKDF2_ITERATIONS, HASH_BYTE_SIZE);
-            
-            #return hash of the format: sha1:1000:DEADBEEF:CAFEBABE
-            return ['sha1', PBKDF2_ITERATIONS, salt, Base64.encode64(pbkdf2)].join(SECTION_DELIMITER);
-        end
-        
-        def validatePassword(password, correctHash)
-            params = correctHash.split(PBKDF2_ITERATIONS);
-            return false if params.length != HASH_SECTIONS;
-            
-            pbkdf2 = Base64.decode64(params[HASH_INDEX]);
-            testHash = OpenSSL::PKCS5::pbkdf2_hmac_sha1(password, params[SALT_INDEX], params[ITERATIONS_INDEX].to_i, pbkdf2.length)
-            
-            return pbkdf2 == testHash
         end
     end
 end

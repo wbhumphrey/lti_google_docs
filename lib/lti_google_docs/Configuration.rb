@@ -1,10 +1,10 @@
 module LtiGoogleDocs
     class Configuration
         def initialize
-            puts "GETTING CONFIGURATION!"
+          #  puts "GETTING CONFIGURATION!"
             config = LTI_CONFIG
 #            config = YAML.load_file(File.join(__dir__, '../../', 'config.yml'))
-            puts config.inspect
+         #   puts config.inspect
             @client_id = config['Google_Credentials']['client_id']
             @client_secret = config['Google_Credentials']['client_secret']
             @redirect_uri = "http://#{config['Google_Credentials']['redirect_ip']}:#{config['Google_Credentials']['redirect_port']}/lti_google_docs/register/google"
