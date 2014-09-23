@@ -11,6 +11,9 @@ module LtiGoogleDocs::Api::V2
         
         # GET list all clients
         def index
+            
+            puts "HOPING FOR HOST VALUE: #{request.headers['host']}"
+            
             render text: ["Token generated: \n",generateToken].join
         end
         

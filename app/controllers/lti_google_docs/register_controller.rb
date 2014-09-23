@@ -73,9 +73,13 @@ module LtiGoogleDocs
       
     
     def canvas
+        
+        
+        host = request.headers["host"].split(':')[0]
+        
         ps = {}
         ps[:client_id] = params[:consumer_key]
-        ps[:redirect_uri] = "http://#{get_my_ip_address}:#{request.port}/lti_google_docs/register/confirmed2"
+        ps[:redirect_uri] = "https://#{host}:#{request.port}/lti_google_docs/register/confirmed2"
         ps[:response_type] = 'code'
         ps[:state] = params[:canvas_user_id];
         query = ps.to_query
