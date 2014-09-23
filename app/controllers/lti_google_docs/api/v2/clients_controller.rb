@@ -89,7 +89,7 @@ module LtiGoogleDocs::Api::V2
             if !lti_user
                 #tell the client to retrieve the canvas token from the canvas server
                 
-                @oauth_consumer_key = Clients.find_by(client_id: params[:oauth_consumer_key]).canvas_clientid
+                @oauth_consumer_key = Client.find_by(client_id: params[:oauth_consumer_key]).canvas_clientid
                 @canvas_user_id = params[:custom_canvas_user_id]
                 @canvas_server_address = params[:custom_canvas_api_domain]
                 render "retrieve_canvas_token"
