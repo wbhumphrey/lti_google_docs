@@ -79,7 +79,7 @@ module LtiGoogleDocs
         ps[:response_type] = 'code'
         ps[:state] = params[:canvas_user_id];
         query = ps.to_query
-        url = URI.parse("http://#{params[:domain]}/login/oauth2/auth?#{query}")
+        url = URI.parse("https://#{params[:domain]}/login/oauth2/auth?#{query}")
 
         puts "REDIRECTING TO URL: #{url}"
         redirect_to "#{url}"
