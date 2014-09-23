@@ -28,7 +28,7 @@ module LtiGoogleDocs::Api::V2
         def create
             puts params.inspect
             
-            api_token = request.headers["LTI_API_TOKEN"]
+            api_token = request.headers["HTTP_LTI_API_TOKEN"]
             if !api_token
                 puts 'Missing API token in LTI_API_TOKEN header'
                 render json: { error: 'Missing API token in LTI_API_TOKEN header'}.to_json, status: :bad_request
@@ -56,9 +56,23 @@ module LtiGoogleDocs::Api::V2
                     return
                 end
                 
+                course = Course.find_by(id: lab.course_id)
+                if !course
+                    puts "ERROR FINDING COURSE WITH ID: #{lab.course_id}"
+                    render json: {error: 'No course could be found for lab'}.to_json, status: :bad_request
+                    return
+                end
+                
+                client = Client.find_by(id: course.client_id)
+                if !client
+                    puts "ERROR FINDING CLIENT WITH ID: #{course.client_id}"
+                    render json: {error: 'No client could be found for course'}.to_json, status: :bad_request
+                    return
+                end
                 
                 #retrieve students enrolled in course
                 puts "RETRIEVING STUDENTS ENROLLED IN COURSE"
+                canvas_client = new_canvas_client(client)
                 canvas_client.access_token = u.canvas_access_token
                 lti_course_id = lab.course_id
                 lti_course = Course.find_by(id: lti_course_id)
@@ -84,6 +98,7 @@ module LtiGoogleDocs::Api::V2
                             id_of_file_to_copy = lab.folderId
                             
                             #get files from folder to be copied
+                            drive = new_drive(client)
                             files_from_folder_to_be_copied = drive.list_children(id_of_file_to_copy)
                             
                             puts files_from_folder_to_be_copied.inspect
@@ -175,6 +190,18 @@ module LtiGoogleDocs::Api::V2
             render json: {}, status: :no_content
         end
     
+    
+        def new_canvas_client(client)
+            cc = LtiGoogleDocs::CanvasClient.new(client.canvas_url)
+            cc.client_id = client.canvas_clientid
+            cc.client_secret = client.canvas_client_secret
+            
+            #this needs to be domain_tool_is_running_on:port_tool_is_using/lti_google_docs/register/confirmed2
+            cc.redirect_uri = "http://"+get_my_ip_address+":31337/lti_google_docs/register/confirmed2"
+            return cc
+        end
+    
+    
         #======= UTILITIES
         def validate_google_access_token(user)
             if is_google_access_token_valid?(user.google_access_token)
@@ -195,9 +222,9 @@ module LtiGoogleDocs::Api::V2
             end
         end
         
-        def drive
+        def new_drive(client)
             return @drive_client if @drive_client
-            @drive_client = LtiGoogleDocs::GoogleDriveClient.new(:google_client => google_client, :canvas_client => canvas_client)
+            @drive_client = LtiGoogleDocs::GoogleDriveClient.new(:google_client => google_client, :canvas_client => new_canvas_client(client))
             
             return @drive_client
         end

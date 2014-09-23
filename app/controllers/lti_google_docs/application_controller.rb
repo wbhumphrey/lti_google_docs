@@ -35,9 +35,9 @@ module LtiGoogleDocs
             retrieve_configuration
             
             #render lti error message unless there was no error
-            if request.post?
-                render tool_provider.lti_msg unless !tool_provider.lti_msg
-            end
+#            if request.post? && !request.headers['HTTP_LTI_API_TOKEN']
+#                render tool_provider.lti_msg unless !tool_provider.lti_msg
+#            end
         end
 
         def set_default_headers
@@ -118,18 +118,18 @@ module LtiGoogleDocs
             return @gc
         end
 
-        def canvas_client
-            return @cc if @cc
-            
-            #HARDCODING THIS URL IS A TERRIBLE IDEA!
-            # THIS SHOULD BE ACCESSED FROM AN ACCOUNTS DATABASE TABLE OR SUCH
-            @cc = LtiGoogleDocs::CanvasClient.new("http://127.0.0.1:3000")
-            @cc.client_id = @canvas_client_id
-            @cc.redirect_uri = @canvas_redirect_uri
-            @cc.client_secret = @canvas_client_secret
-            
-            return @cc
-        end
+#        def canvas_client
+#            return @cc if @cc
+#            
+#            #HARDCODING THIS URL IS A TERRIBLE IDEA!
+#            # THIS SHOULD BE ACCESSED FROM AN ACCOUNTS DATABASE TABLE OR SUCH
+#            @cc = LtiGoogleDocs::CanvasClient.new("http://127.0.0.1:3000")
+#            @cc.client_id = @canvas_client_id
+#            @cc.redirect_uri = @canvas_redirect_uri
+#            @cc.client_secret = @canvas_client_secret
+#            
+#            return @cc
+#        end
         
         def is_google_access_token_valid?(access_token)
             if !access_token then return false end

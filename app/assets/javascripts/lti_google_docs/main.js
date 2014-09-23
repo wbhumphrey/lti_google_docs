@@ -82,10 +82,10 @@ app.controller('FactoryCtrl', ['$scope', '$http', '$modal', '$location', functio
                 course_id: $scope.course_id
             };
             // /lti_google_docs/api/v2/labs/new
-            $http.post('/lti_google_docs/api/v2/courses/'+$scope.course_id+'/labs/new', JSON.stringify(data)).success(function(data, status, headers, config) {
+            $http.post('/lti_google_docs/api/v2/courses/'+$scope.course_id+'/labs/new', JSON.stringify(data), {headers: {"LTI_API_TOKEN": $scope.api_token}}).success(function(data, status, headers, config) {
                 console.log("SUCCESSFUL CREATION!");
                 console.log("RETRIEVING NEW LIST OF LABS!");
-                $http.get('/lti_google_docs/api/v2/labs')
+                $http.get('/lti_google_docs/api/v2/labs', {headers: {"LTI_API_TOKEN": $scope.api_token}})
                     .success(function(data, status, headers, config) {
 
                         $scope.form.labs = [];
@@ -379,10 +379,11 @@ app.controller('AccountInfoCtrl', ['$scope', '$http', '$location', function($sco
         });
                     
     };
+    $scope.successfulAuthentication();
     
-    if(handleLoad) {
-        handleLoad($scope);
-    }
+//    if(handleLoad) {
+//        handleLoad($scope);
+//    }
 }]);
                     
 app.controller('CourseInfoCtrl', ['$scope', '$http', function($scope, $http) {

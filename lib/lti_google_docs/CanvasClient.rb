@@ -62,7 +62,7 @@ module LtiGoogleDocs
         end
 
         def list_students_in_course(course_id)
-            uri = URI.parse("#{@canvas_url}/api/v1/courses/#{course_id}/users?access_token=#{@access_token}&enrollment_type=student")
+            uri = URI.parse("http://#{@canvas_url}/api/v1/courses/#{course_id}/users?access_token=#{@access_token}&enrollment_type=student")
             
             puts "LISTING STUDENTS URI: #{uri}"
             response = Net::HTTP.get_response(uri)
@@ -74,7 +74,7 @@ module LtiGoogleDocs
         end
         
         def add_tool_to_course_with_credentials(course, tool_name, tool_url, consumer_key, shared_secret) 
-            uri = URI.parse("#{@canvas_url}/api/v1/courses/#{course}/external_tools")
+            uri = URI.parse("http://#{@canvas_url}/api/v1/courses/#{course}/external_tools")
             http = Net::HTTP.new(uri.host, uri.port)
             request = Net::HTTP::Post.new(uri.request_uri)
 
@@ -95,7 +95,7 @@ module LtiGoogleDocs
         end
         
         def add_course_link(course, tool_name, tool_url, consumer_key, shared_secret, link_url, link_caption)
-            uri = URI.parse("#{@canvas_url}/api/v1/courses/#{course}/external_tools")
+            uri = URI.parse("http://#{@canvas_url}/api/v1/courses/#{course}/external_tools")
             http = Net::HTTP.new(uri.host, uri.port)
             request = Net::HTTP::Post.new(uri.request_uri)
             
@@ -121,7 +121,7 @@ module LtiGoogleDocs
         end
         
         def add_module_to_course(course, name)
-            uri = URI.parse("#{@canvas_url}/api/v1/courses/#{course}/modules")
+            uri = URI.parse("http://#{@canvas_url}/api/v1/courses/#{course}/modules")
             http = Net::HTTP.new(uri.host, uri.port)
             
             request = Net::HTTP::Post.new(uri.request_uri)
@@ -136,7 +136,7 @@ module LtiGoogleDocs
         end
         
         def add_tool_to_course_module(course, module_id, tool_id, label, tool_url)
-            uri = URI.parse("#{@canvas_url}/api/v1/courses/#{course}/modules/#{module_id}/items")
+            uri = URI.parse("http://#{@canvas_url}/api/v1/courses/#{course}/modules/#{module_id}/items")
             http = Net::HTTP.new(uri.host, uri.port)
             puts "MAKING REQUEST TO: #{uri.request_uri}"
             request = Net::HTTP::Post.new(uri.request_uri)
@@ -155,7 +155,7 @@ module LtiGoogleDocs
         end
         
         def remove_tool_from_course(course_id, tool_id)
-            uri = URI.parse("#{@canvas_url}/api/v1/courses/#{course_id}/external_tools/#{tool_id}")
+            uri = URI.parse("http://#{@canvas_url}/api/v1/courses/#{course_id}/external_tools/#{tool_id}")
             
             puts "REQUESTING TO REMOVE TOOL AT: #{uri}"
             http = Net::HTTP.new(uri.host, uri.port)
@@ -169,7 +169,7 @@ module LtiGoogleDocs
         end
         
         def start_conversation(to, message)
-            uri = URI.parse("#{@canvas_url}/api/v1/conversations")
+            uri = URI.parse("http://#{@canvas_url}/api/v1/conversations")
             http = Net::HTTP.new(uri.host, uri.port)
             
             request = Net::HTTP::Post.new(uri.request_uri)

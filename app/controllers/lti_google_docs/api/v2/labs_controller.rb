@@ -40,8 +40,8 @@ module LtiGoogleDocs::Api::V2
             @canvas_server_address = params[:custom_canvas_api_domain]
             # get User entry if it exists
             
-            if !@custom_canvas_user_id || @custom_canvas_user_id == nil
-                render text: "No canvas course id was sent. Maybe the person who installed the LTI did not specify public access?"
+            if !@canvas_user_id || @canvas_user_id == nil
+                render text: "No canvas user id was sent. Maybe the person who installed the LTI did not specify public access?"
                 return
             end
             
@@ -92,7 +92,7 @@ module LtiGoogleDocs::Api::V2
         def new
             puts "INSIDE NEW"
             
-            api_token = request.headers["LTI_API_TOKEN"]
+            api_token = request.headers["HTTP_LTI_API_TOKEN"]
             if !api_token
                 puts 'Missing API token in LTI_API_TOKEN header'
                 render json: { error: 'Missing API token in LTI_API_TOKEN header'}.to_json, status: :bad_request
@@ -137,6 +137,7 @@ module LtiGoogleDocs::Api::V2
                     client = Client.find_by(id: client_id)
                     key = client.client_id
                     secret = client.client_secret
+                    canvas_client = new_canvas_client(client)
                     canvas_client.access_token = u.canvas_access_token
                     url = "http://#{get_my_ip_address}:#{request.port}/lti_google_docs/api/v2/labs/#{lab.id}/launch"
                     tool_added = JSON.parse(canvas_client.add_tool_to_course_with_credentials(canvas_course_id, "(LAB) #{title}", url, key, secret))
@@ -175,7 +176,7 @@ module LtiGoogleDocs::Api::V2
         end
         
         def destroy
-            api_token = request.headers["LTI_API_TOKEN"]
+            api_token = request.headers["HTTP_LTI_API_TOKEN"]
             if !api_token
                 puts 'Missing API token in LTI_API_TOKEN header'
                 render json: { error: 'Missing API token in LTI_API_TOKEN header'}.to_json, status: :bad_request
@@ -197,7 +198,7 @@ module LtiGoogleDocs::Api::V2
                 puts "HOW IN GODS GREEN EARTH DID WE GET HERE?"
             else
                 lab = Lab.find_by(id: lab_id)
-                course = Course.find_by(id: lab.course_id).canvas_course_id
+                
                 if lab
                     puts "DESTROYING LAB"
                     lab.destroy
@@ -207,10 +208,28 @@ module LtiGoogleDocs::Api::V2
                     tool = CanvasTools.find_by(labid: lab_id)
                     
                     if tool
+                        course = Course.find_by(id: lab.course_id)
+                        if !course
+                            tool.destroy
+                            render json: {}, status: :no_content
+                            return
+                        end
+                        
+                        client = Client.find_by(id: course.client_id)
+                        if !client
+                            tool.destroy
+                            render json: {}, status: :no_content
+                            return
+                        end
+                        
+                        
+                        canvas_client = new_canvas_client(client)
                         canvas_client.access_token = u.canvas_access_token
                         #remove tool from canvas
+                        
+                        
                         puts "REMOVING LTI FROM CANVAS"
-                        canvas_client.remove_tool_from_course(course, tool.canvas_tool_id)
+                        canvas_client.remove_tool_from_course(course.canvas_course_id, tool.canvas_tool_id)
 
                         #do we need to iterate through every module as well?
 
@@ -245,7 +264,7 @@ module LtiGoogleDocs::Api::V2
             # get User entry if it exists
             
             if !@canvas_user_id
-                render text: "No canvas course id was sent. Maybe the person who installed the LTI did not specify public access?"
+                render text: "No canvas user id was sent. Maybe the person who installed the LTI did not specify public access?"
                 return
             end
             
@@ -278,7 +297,9 @@ module LtiGoogleDocs::Api::V2
             else
                 puts "CONTINUE WITH LAB CREATOR AS NORMAL...";
             end
-            
+            lab = Lab.find_by(id: @lab_id)
+            course = Course.find_by(id: lab.course_id)
+            client = Client.find_by(id: course.client_id)
             
             
             instances = LabInstance.where(labid: @lab_id)
@@ -303,6 +324,7 @@ module LtiGoogleDocs::Api::V2
                     # retrieve shared_folder_id from labinstance
                         shared_folder_id = lab_instance.fileid
                     # retrieve list of files from shared folder
+                        drive = new_drive(client)
                         shared_files_json = drive.list_children(shared_folder_id)
                     # generate object via JSON.generate from list of files (as json)
                     # put generated object in cookie with key 'shared_files'
@@ -356,9 +378,20 @@ module LtiGoogleDocs::Api::V2
             end
         end
     
-        def drive
+        def new_canvas_client(client)
+            cc = LtiGoogleDocs::CanvasClient.new(client.canvas_url)
+            cc.client_id = client.canvas_clientid
+            cc.client_secret = client.canvas_client_secret
+            
+            #this needs to be domain_tool_is_running_on:port_tool_is_using/lti_google_docs/register/confirmed2
+            cc.redirect_uri = "http://"+get_my_ip_address+":31337/lti_google_docs/register/confirmed2"
+            return cc
+        end
+    
+    
+        def new_drive(client)
             return @drive_client if @drive_client
-            @drive_client = LtiGoogleDocs::GoogleDriveClient.new(:google_client => google_client, :canvas_client => canvas_client)
+            @drive_client = LtiGoogleDocs::GoogleDriveClient.new(:google_client => google_client, :canvas_client => new_canvas_client(client))
             
             return @drive_client
         end

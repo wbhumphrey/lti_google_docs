@@ -126,6 +126,7 @@ module LtiGoogleDocs::Api::V2
                     # create course and associate it with this client
                     course = Course.create(client_id: client.id, canvas_course_id: course_id)
                     # create "Lab Creator (Step 2)" tool entry into Canvas
+                    canvas_client = new_canvas_client(client)
                     canvas_client.access_token = lti_user.canvas_access_token
                     canvas_client.add_course_link(course_id,
                                                 "Lab Creator (Step 2)",
@@ -186,5 +187,16 @@ module LtiGoogleDocs::Api::V2
         def new
             render "registration"
         end
+        
+        def new_canvas_client(client)
+            cc = LtiGoogleDocs::CanvasClient.new(client.canvas_url)
+            cc.client_id = client.canvas_clientid
+            cc.client_secret = client.canvas_client_secret
+            
+            #this needs to be domain_tool_is_running_on:port_tool_is_using/lti_google_docs/register/confirmed2
+            cc.redirect_uri = "http://"+get_my_ip_address+":31337/lti_google_docs/register/confirmed2"
+            return cc
+        end
+        
     end
 end
