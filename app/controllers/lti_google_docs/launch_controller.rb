@@ -1,7 +1,5 @@
 require_dependency "lti_google_docs/application_controller"
-require_dependency "lti_google_docs/labs_controller"
-
-
+#require_dependency "lti_google_docs/labs_controller"
 
 module LtiGoogleDocs
   class LaunchController < ApplicationController

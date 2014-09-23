@@ -499,7 +499,7 @@ app.controller('StudentLabCtrl_v2', ['$scope', '$http', '$cookies', function($sc
        // var path = "https://docs.google.com/document/d/"+item.id+"/edit?embedded=true";
         var path = "https://docs.google.com/document/d/"+item.id+"/edit";
         console.log(path);
-        $scope.paths.push(path);
+        $scope.paths.push({'title': item.title, 'path': path});
     }
     console.log($scope.paths);
 }]);
@@ -543,9 +543,21 @@ app.controller('RetrieveResourceTokensCtrl', ['$scope', '$window', function($sco
     console.log("NEED CANVAS TOKEN: "+we_need_canvas_token);
     
     $scope.showRequestPopup = function() {
-        var output = $window.open("/lti_google_docs/launch/auth?canvas_server_address="+canvas_server_address+"&canvas_user_id="+canvas_user_id+"&needs_canvas="+we_need_canvas_token, "LTI Authentication", "with=800, height=600");
-        console.log("WINDOW OPENED!");
-        console.log(output);
-    }
                     
+        if(we_need_google_token && we_need_canvas_token) {
+            var output = $window.open("/lti_google_docs/launch/auth?canvas_server_address="+canvas_server_address+"&canvas_user_id="+canvas_user_id+"&needs_canvas="+we_need_canvas_token, "LTI Authentication", "with=800, height=600");
+            console.log("WINDOW OPENED!");
+            console.log(output);    
+        } else if(we_need_google_token) {
+             var output = $window.open("/lti_google_docs/launch/auth?canvas_server_address="+canvas_server_address+"&canvas_user_id="+canvas_user_id+"&needs_canvas="+we_need_canvas_token, "LTI Authentication", "with=800, height=600");
+            console.log("WINDOW OPENED!");
+            console.log(output);       
+        } else if(we_need_canvas_token) {
+            var output = $window.open('/lti_google_docs/register/canvas?domain='+canvas_server_address+'&canvas_user_id='+canvas_user_id, 'LTI Authentication', "width=800", "height=600");
+            console.log("WINDOW OPENED!");
+            console.log(output);
+        } else {
+             //we don't need either token but the view was loaded?            
+        }
+    };              
 }]);

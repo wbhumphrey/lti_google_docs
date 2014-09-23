@@ -60,4 +60,3 @@ module LtiGoogleDocs
 
   end
 end
-end

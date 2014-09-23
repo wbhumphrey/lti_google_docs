@@ -1,4 +1,6 @@
 require_dependency "lti_google_docs/application_controller"
+require_dependency "../../lib/lti_google_docs/GoogleDriveClient"
+
 require 'json'
 
 module LtiGoogleDocs::Api::V2
@@ -228,6 +230,7 @@ module LtiGoogleDocs::Api::V2
         # POST as an LTI from Canvas
         def launch
             puts params.inspect
+
             
             @lab_id = params[:lab_id]
             student_id = params[:custom_canvas_user_id]
@@ -252,11 +255,21 @@ module LtiGoogleDocs::Api::V2
             if !u
                 # tell the client we need both the google access token and the canvas token
                 @need_google_token = true
-                @need_canvas_token = true
+                @need_canvas_token = false
+                
+                # we check for designer here, because student's shouldn't be doing anything with canvas access tokens.
+                if !tool_provider.student?
+                    @need_canvas_token = true
+                end
             else 
-                validate_google_access_token(lti_user)
-                @need_google_token = !lti_user.google_access_token
-                @need_canvas_token = !lti_user.canvas_access_token
+                validate_google_access_token(u)
+                @need_google_token = !u.google_access_token
+                @need_canvas_token = false
+                
+                # we check for designer here, because student's shouldn't be doing anything with canvas access tokens.
+                if !tool_provider.student?
+                    @need_canvas_token = !u.canvas_access_token
+                end
             end
         
             if @need_google_token || @need_canvas_token

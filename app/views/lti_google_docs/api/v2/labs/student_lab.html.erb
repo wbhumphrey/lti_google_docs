@@ -1,10 +1,20 @@
 <div ng-app="LTI_GOOGLE_DOCS">
     <div id="google-lti-body" class="container" ng-controller="StudentLabCtrl_v2">
-        {{welcome_message}}
-    
+
+<!--
         <div ng-repeat="path in paths">
-            <iframe style="resize: both; overflow:auto" src="{{path}}"></iframe>
+            <iframe style="resize: both; overflow:auto; width: 820 px; height: 600 px" src="{{path}}"></iframe>
         </div>
+-->
+        
+        <tabset>
+            <tab ng-repeat="path in paths">
+                <tab-heading>
+                    Lab Notebook
+                </tab-heading>
+                <iframe style="resize: both; overflow:auto; width: 820 px; height: 600 px" src="{{path.path}}"></iframe>
+            </tab>
+        </tabset>
     
     </div>
 </div>
