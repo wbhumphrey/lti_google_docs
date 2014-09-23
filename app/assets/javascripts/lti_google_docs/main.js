@@ -521,7 +521,7 @@ app.controller('RetrieveCanvasTokenCtrl', ['$scope', '$window', function($scope,
     console.log("FOUND KEY: "+consumer_key);
     $scope.showRequestPopup = function() {
         console.log("SHOWING POPUP!");
-        $window.open('/lti_google_docs/register/canvas?domain='+canvas_server_address+'&canvas_user_id='+canvas_user_id+'&consumer_key='+consumey_key, 'LTI Authentication', "width=800", "height=600");
+        $window.open('/lti_google_docs/register/canvas?domain='+canvas_server_address+'&canvas_user_id='+canvas_user_id+'&consumer_key='+consumer_key, 'LTI Authentication', "width=800", "height=600");
     };
 }]);
 
