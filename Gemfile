@@ -24,3 +24,4 @@ gem 'font-awesome-sass'
 
 gem 'google-api-client', '>= 0.6'
 gem 'signet', :git => 'git://github.com/google/signet.git'
+gem 'thin'
