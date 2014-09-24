@@ -80,7 +80,7 @@ module LtiGoogleDocs
         ps = {}
         if params[:canvas_clientid]
             ps[:client_id] = params[:canvas_clientid]
-        else if params[:consumer_key]
+        elsif params[:consumer_key]
             ps[:client_id] = params[:consumer_key]
         else
             ps[:client_id] = -1
