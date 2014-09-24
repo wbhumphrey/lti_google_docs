@@ -150,6 +150,15 @@ module LtiGoogleDocs::Api::V2
                 
                     if !module_body["errors"]
                         puts "MODULE CREATION SUCCESS"
+                        
+                        result_string = canvas_client.publish_module_in_course(course.canvas_course_id, module_body["id"])
+                        result_body = JSON.parse(result_string)
+                        if !result_body["errors"]
+                            puts "MODULE PUBLISH SUCCESS!"
+                        else
+                            puts "SOMETHING WENT WRONG TRYING TO PUBLISH THE MODULE!";
+                        end
+                        
                         course.update(canvas_module_id: module_body["id"])
                         course.save
                     else
