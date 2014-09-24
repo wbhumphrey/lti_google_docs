@@ -130,6 +130,8 @@ module LtiGoogleDocs::Api::V2
                     return
                 #if not, create it...
                 else
+                    
+                    host = request.headers["host"].split(':')[0]
                     # create course and associate it with this client
                     course = Course.create(client_id: client.id, canvas_course_id: course_id)
                     # create "Lab Creator (Step 2)" tool entry into Canvas
@@ -140,7 +142,7 @@ module LtiGoogleDocs::Api::V2
                                                 "www.google.com",
                                                 key,
                                                 client.client_secret,
-                                                "https://#{get_my_ip_address}:#{request.port}/lti_google_docs/api/v2/labs",
+                                                "https://#{host}:#{request.port}/lti_google_docs/api/v2/labs",
                                                 "Lab Creator (Step 2)")
                 
                     json_string = canvas_client.add_module_to_course(course.canvas_course_id, "Labs")
