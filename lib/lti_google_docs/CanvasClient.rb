@@ -49,7 +49,7 @@ module LtiGoogleDocs
         end
 
         def request_access_token!
-            uri = URI.parse(@auth_uri)
+            uri = URI.parse("https://#{@auth_uri}")
             response = Net::HTTP.post_form(uri, {"client_id"=>@client_id, "redirect_uri"=>@redirect_uri, "client_secret"=>@client_secret, "code"=>@code})
             @access_token = JSON.parse(response.body)['access_token']
         end
