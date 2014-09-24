@@ -76,6 +76,7 @@ module LtiGoogleDocs
         def add_tool_to_course_with_credentials(course, tool_name, tool_url, consumer_key, shared_secret) 
             uri = URI.parse("https://#{@canvas_url}/api/v1/courses/#{course}/external_tools")
             http = Net::HTTP.new(uri.host, uri.port)
+            http.use_ssl = true
             request = Net::HTTP::Post.new(uri.request_uri)
 
             request["Authorization"] = "Bearer #{@access_token}"
@@ -97,6 +98,7 @@ module LtiGoogleDocs
         def add_course_link(course, tool_name, tool_url, consumer_key, shared_secret, link_url, link_caption)
             uri = URI.parse("https://#{@canvas_url}/api/v1/courses/#{course}/external_tools")
             http = Net::HTTP.new(uri.host, uri.port)
+            http.use_ssl = true
             request = Net::HTTP::Post.new(uri.request_uri)
             
             request["Authorization"] = "Bearer #{@access_token}"
@@ -123,7 +125,7 @@ module LtiGoogleDocs
         def add_module_to_course(course, name)
             uri = URI.parse("https://#{@canvas_url}/api/v1/courses/#{course}/modules")
             http = Net::HTTP.new(uri.host, uri.port)
-            
+            http.use_ssl = true
             request = Net::HTTP::Post.new(uri.request_uri)
             request["Authorization"] = "Bearer #{@access_token}"
             
@@ -138,6 +140,7 @@ module LtiGoogleDocs
         def add_tool_to_course_module(course, module_id, tool_id, label, tool_url)
             uri = URI.parse("https://#{@canvas_url}/api/v1/courses/#{course}/modules/#{module_id}/items")
             http = Net::HTTP.new(uri.host, uri.port)
+            http.use_ssl = true
             puts "MAKING REQUEST TO: #{uri.request_uri}"
             request = Net::HTTP::Post.new(uri.request_uri)
             request["Authorization"] = "Bearer #{@access_token}"
@@ -159,6 +162,7 @@ module LtiGoogleDocs
             
             puts "REQUESTING TO REMOVE TOOL AT: #{uri}"
             http = Net::HTTP.new(uri.host, uri.port)
+            http.use_ssl = true
             request = Net::HTTP::Delete.new(uri.request_uri)
             
             request["Authorization"] = "Bearer #{@access_token}"
@@ -171,7 +175,7 @@ module LtiGoogleDocs
         def start_conversation(to, message)
             uri = URI.parse("https://#{@canvas_url}/api/v1/conversations")
             http = Net::HTTP.new(uri.host, uri.port)
-            
+            http.use_ssl = true
             request = Net::HTTP::Post.new(uri.request_uri)
             request["Authorization"] = "Bearer #{@access_token}"
             
