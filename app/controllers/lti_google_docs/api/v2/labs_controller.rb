@@ -99,6 +99,7 @@ module LtiGoogleDocs::Api::V2
             render "lab_creator"
         end
         
+        # POST - ajax request from lab_creator
         def new
             puts "INSIDE NEW"
             
@@ -149,7 +150,9 @@ module LtiGoogleDocs::Api::V2
                     secret = client.client_secret
                     canvas_client = new_canvas_client(client)
                     canvas_client.access_token = u.canvas_access_token
-                    url = "http://#{get_my_ip_address}:#{request.port}/lti_google_docs/api/v2/labs/#{lab.id}/launch"
+                    host = request.headers['host'].split(':')[0]
+                    
+                    url = "https://#{host}:#{request.port}/lti_google_docs/api/v2/labs/#{lab.id}/launch"
                     tool_added = JSON.parse(canvas_client.add_tool_to_course_with_credentials(canvas_course_id, "(LAB) #{title}", url, key, secret))
                     puts tool_added.inspect
                     if tool_added["errors"]
