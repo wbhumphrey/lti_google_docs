@@ -178,7 +178,7 @@ module LtiGoogleDocs::Api::V2
                         
                         tool_json_result = canvas_client.publish_tool_to_course_module(canvas_course_id, canvas_course.canvas_module_id, operation_result["id"])
                         tool_result = JSON.parse(tool_json_result)
-                        if !tool_request["errors"]
+                        if !tool_result["errors"]
                             puts "PUBLISHED LAB IN MODULE!"
                         else
                             puts "THERE WERE ERRORS PUBLISHING LAB IN OUR MODULE"
