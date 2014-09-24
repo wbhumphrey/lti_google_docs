@@ -516,12 +516,15 @@ app.controller('RetrieveCanvasTokenCtrl', ['$scope', '$window', function($scope,
     var canvas_server_address = angular.element("#canvas-server-address").val();
     var canvas_user_id = angular.element("#canvas-user-id").val();
     var consumer_key = angular.element("#consumer-key").val();
+    var lti_client_id = angular.element("#lti-client-id");
     console.log("FOUND ADDRESS: "+canvas_server_address);
     console.log("FOUND USER ID: "+canvas_user_id);
     console.log("FOUND KEY: "+consumer_key);
+    console.log("FOUND ID: "+lti_client_id);
+                    
     $scope.showRequestPopup = function() {
         console.log("SHOWING POPUP!");
-        $window.open('/lti_google_docs/register/canvas?domain='+canvas_server_address+'&canvas_user_id='+canvas_user_id+'&consumer_key='+consumer_key, 'LTI Authentication', "width=800", "height=600");
+        $window.open('/lti_google_docs/register/canvas?domain='+canvas_server_address+'&canvas_user_id='+canvas_user_id+'&consumer_key='+consumer_key+"&lti_client_id="+lti_client_id, 'LTI Authentication', "width=800", "height=600");
     };
 }]);
 

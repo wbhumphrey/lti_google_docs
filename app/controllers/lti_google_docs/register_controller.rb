@@ -81,7 +81,7 @@ module LtiGoogleDocs
         ps[:client_id] = params[:consumer_key]
         ps[:redirect_uri] = "https://#{host}:#{request.port}/lti_google_docs/register/confirmed2"
         ps[:response_type] = 'code'
-        ps[:state] = params[:canvas_user_id];
+        ps[:state] = "canvas_user_id=#{params[:canvas_user_id]},lti_client_id=#{params[:lti_client_id]}";
         query = ps.to_query
         url = URI.parse("https://#{params[:domain]}/login/oauth2/auth?#{query}")
 
@@ -96,9 +96,31 @@ module LtiGoogleDocs
         puts params.inspect
         
         code = params[:code]
-        canvas_user_id = params[:state]
         puts "RETRIEVAL CODE: #{code}"
-        client = canvas_client 
+        
+        csv_key_value_pairs = params[:state]
+        key_value_pairs = csv_key_value_pairs.split(',')
+        
+        state_object = {}
+        key_value_pairs.each do |pair|
+            tokens = pair.split('=')
+            key = tokens[0];
+            value = tokens[1];
+            state_object[key] = value
+        end
+        
+        if !state_object['lti_client_id']
+            render json: {error: 'lti client id not passed through Canvas OAuth2 web flow!'}.to_json, status: :bad_request
+            return
+        end
+        
+        lit_client_id = state_object['lti_client_id']
+        ### RETRIEVE CLIENT FROM lti_client_id ###
+        lti_client = Client.find_by(id: lti_client_id)
+        ### END RETRIEVE CLIENT ###
+        
+        canvas_user_id = state_object['canvas_user_id']
+        client = new_canvas_client (lti_client)
 
         client.auth_code = code
         
@@ -142,6 +164,16 @@ module LtiGoogleDocs
         return @drive_client if @drive_client
         @drive_client = LtiGoogleDocs::GoogleDriveClient.new(:google_client => google_client, :canvas_client => canvas_client)
         return @drive_client
+    end
+
+    def new_canvas_client(client)
+        cc = LtiGoogleDocs::CanvasClient.new(client.canvas_url)
+        cc.client_id = client.canvas_clientid
+        cc.client_secret = client.canvas_client_secret
+
+        #this needs to be domain_tool_is_running_on:port_tool_is_using/lti_google_docs/register/confirmed2
+        cc.redirect_uri = "http://"+get_my_ip_address+":31337/lti_google_docs/register/confirmed2"
+        return cc
     end
 
   end
