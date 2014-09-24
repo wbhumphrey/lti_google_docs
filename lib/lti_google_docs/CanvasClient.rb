@@ -129,7 +129,7 @@ module LtiGoogleDocs
             request = Net::HTTP::Post.new(uri.request_uri)
             request["Authorization"] = "Bearer #{@access_token}"
             
-            request.set_form_data({"module[name]" => name})
+            request.set_form_data({"module[name]" => name, "module[published]" => true})
             response = http.request(request)
             puts "SENDING REQUEST TO CREATE MODULE"
             puts response.body
