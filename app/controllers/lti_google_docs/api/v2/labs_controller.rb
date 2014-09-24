@@ -52,6 +52,14 @@ module LtiGoogleDocs::Api::V2
                 @need_google_token = true
                 @need_canvas_token = true
             else 
+                
+                if !lti_user.refresh || lti_user.refresh == "" || lti_user.refresh == nil
+                    @need_google_token = true
+                    @need_canvas_token = true
+                    render "retrieve_resource_tokens"
+                    return
+                end
+                    
                 validate_google_access_token(lti_user)
                 @need_google_token = !lti_user.google_access_token
                 @need_canvas_token = !lti_user.canvas_access_token
@@ -378,6 +386,7 @@ module LtiGoogleDocs::Api::V2
             end
         end
     
+    
         def new_canvas_client(client)
             cc = LtiGoogleDocs::CanvasClient.new(client.canvas_url)
             cc.client_id = client.canvas_clientid
@@ -387,7 +396,6 @@ module LtiGoogleDocs::Api::V2
             cc.redirect_uri = "http://"+get_my_ip_address+":31337/lti_google_docs/register/confirmed2"
             return cc
         end
-    
     
         def new_drive(client)
             return @drive_client if @drive_client
