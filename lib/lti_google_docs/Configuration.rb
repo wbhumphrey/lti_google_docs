@@ -7,7 +7,7 @@ module LtiGoogleDocs
          #   puts config.inspect
             @client_id = config['Google_Credentials']['client_id']
             @client_secret = config['Google_Credentials']['client_secret']
-            @redirect_uri = "http://#{config['Google_Credentials']['redirect_ip']}:#{config['Google_Credentials']['redirect_port']}/lti_google_docs/register/google"
+            @redirect_uri = "https://#{config['Google_Credentials']['redirect_ip']}:#{config['Google_Credentials']['redirect_port']}/lti_google_docs/register/google"
             @scopes = ["#{config['Google_Credentials']['scopes']}"]
 
            @canvas_client_id = config['Canvas_Credentials']['CANVAS_CLIENT_ID']
