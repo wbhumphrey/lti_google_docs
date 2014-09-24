@@ -25,7 +25,7 @@ module LtiGoogleDocs
         ps[:approval_prompt] = 'force'
         ps[:response_type] = 'code'
         ps[:access_type] = 'offline'
-        ps[:state] = "canvas_server_address=#{params[:canvas_server_address]},canvas_user_id=#{params[:canvas_user_id]},needs_canvas=#{params[:needs_canvas]}"
+        ps[:state] = "canvas_server_address=#{params[:canvas_server_address]},canvas_user_id=#{params[:canvas_user_id]},needs_canvas=#{params[:needs_canvas]},canvas_clientid=#{params[:canvas_clientid]}"
 
         query = ps.to_query
         puts query

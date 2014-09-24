@@ -68,7 +68,7 @@ module LtiGoogleDocs
         # since this is redirected to a popup.
 #        redirect_to "/lti_google_docs/register/confirmed"
         puts "REDIRECTING TO /lti_google_docs/register/canvas!";
-      redirect_to "/lti_google_docs/register/canvas?domain=#{state_object['canvas_server_address']}&canvas_user_id=#{state_object['canvas_user_id']}"
+      redirect_to "/lti_google_docs/register/canvas?domain=#{state_object['canvas_server_address']}&canvas_user_id=#{state_object['canvas_user_id']}&canvas_clientid=#{state_object['canvas_clientid']}"
     end
       
     
@@ -78,7 +78,15 @@ module LtiGoogleDocs
         host = request.headers["host"].split(':')[0]
         
         ps = {}
-        ps[:client_id] = params[:consumer_key]
+        if params[:canvas_clientid]
+            ps[:client_id] = params[:canvas_clientid]
+        else if params[:consumer_key]
+            ps[:client_id] = params[:consumer_key]
+        else
+            ps[:client_id] = -1
+        end
+            
+#        ps[:client_id] = params[:consumer_key]
         ps[:redirect_uri] = "https://#{host}:#{request.port}/lti_google_docs/register/confirmed2"
         ps[:response_type] = 'code'
         ps[:state] = "canvas_user_id=#{params[:canvas_user_id]},lti_client_id=#{params[:lti_client_id]}";

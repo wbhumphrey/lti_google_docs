@@ -56,6 +56,8 @@ module LtiGoogleDocs::Api::V2
                 if !lti_user.refresh || lti_user.refresh == "" || lti_user.refresh == nil
                     @need_google_token = true
                     @need_canvas_token = true
+                    lti_client = Client.find_by(client_id: params[:oauth_consumer_key])
+                    @canvas_clientid = lti_client.canvas_clientid
                     render "retrieve_resource_tokens"
                     return
                 end
