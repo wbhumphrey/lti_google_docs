@@ -114,7 +114,7 @@ module LtiGoogleDocs
             return
         end
         
-        lit_client_id = state_object['lti_client_id']
+        lti_client_id = state_object['lti_client_id']
         ### RETRIEVE CLIENT FROM lti_client_id ###
         lti_client = Client.find_by(id: lti_client_id)
         ### END RETRIEVE CLIENT ###
