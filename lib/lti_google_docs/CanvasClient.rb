@@ -157,6 +157,22 @@ module LtiGoogleDocs
             
         end
         
+        def publish_tool_to_course_module(course_id, module_id, tool_id)
+           uri = URI.parse("https://#{@canvas_url}/api/v1/courses/#{course_id}/modules/#{module_id}/items/#{tool_id}")
+            http = Net::HTTP.new(uri.host, uri.port)
+            http.use_ssl = true
+            
+            request = Net::HTTP::Put.new(uri.request_uri)
+            request["Authorization" = "Bearer #{@access_token}"]
+            request.set_form_data({"module_item[published]"=>true})
+            
+            response = http.request(request)
+            puts "PUBLISHED MODULE ITEM?"
+            puts response.body
+            return response.body
+            
+        end
+        
         def publish_module_in_course(course_id, module_id)
             uri = URI.parse("https://#{@canvas_url}/api/v1/courses/#{course_id}/modules/#{module_id}")
             http = Net::HTTP.new(uri.host, uri.port)

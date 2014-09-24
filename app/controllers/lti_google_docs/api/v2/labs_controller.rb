@@ -160,6 +160,9 @@ module LtiGoogleDocs::Api::V2
                         render json: [].to_json
                         return
                     end
+                    
+                    
+                    
                     puts "NEW TOOL ID: #{tool_added['id']}"
                     puts "CANVAS MODULE ID: #{canvas_course.canvas_module_id}"
                     #add entry to database
@@ -172,6 +175,15 @@ module LtiGoogleDocs::Api::V2
                     if !operation_result["errors"]
                         #worked like a charm!
                         puts "ADDED LAB TO MODULE SUCCESSFULLY!"
+                        
+                        tool_json_result = canvas_client.publish_tool_to_course_module(canvas_course_id, canvas_course.canvas_module_id, operation_result["id"])
+                        tool_result = JSON.parse(tool_json_result)
+                        if !tool_request["errors"]
+                            puts "PUBLISHED LAB IN MODULE!"
+                        else
+                            puts "THERE WERE ERRORS PUBLISHING LAB IN OUR MODULE"
+                        end
+                        
                     else
                         puts "THERE WERE ERRORS ADDING NEW LAB TO OUR MODULE"
                     end
