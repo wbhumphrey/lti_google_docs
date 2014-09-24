@@ -516,7 +516,7 @@ app.controller('RetrieveCanvasTokenCtrl', ['$scope', '$window', function($scope,
     var canvas_server_address = angular.element("#canvas-server-address").val();
     var canvas_user_id = angular.element("#canvas-user-id").val();
     var consumer_key = angular.element("#consumer-key").val();
-    var lti_client_id = angular.element("#lti-client-id");
+    var lti_client_id = angular.element("#lti-client-id").val();
     console.log("FOUND ADDRESS: "+canvas_server_address);
     console.log("FOUND USER ID: "+canvas_user_id);
     console.log("FOUND KEY: "+consumer_key);
