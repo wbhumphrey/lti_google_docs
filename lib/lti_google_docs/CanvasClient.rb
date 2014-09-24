@@ -158,7 +158,7 @@ module LtiGoogleDocs
         end
         
         def publish_module_in_course(course_id, module_id)
-            uri = URI.parse("https://#{@canvas_url}/api/v1/courses/#{course}/modules/module_id")
+            uri = URI.parse("https://#{@canvas_url}/api/v1/courses/#{course_id}/modules/module_id")
             http = Net::HTTP.new(uri.host, uri.port)
             http.use_ssl = true
             request = Net::HTTP::Put.new(uri.request_uri)
