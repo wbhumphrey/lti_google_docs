@@ -163,7 +163,7 @@ module LtiGoogleDocs
             http.use_ssl = true
             
             request = Net::HTTP::Put.new(uri.request_uri)
-            request["Authorization" = "Bearer #{@access_token}"]
+            request["Authorization"] = "Bearer #{@access_token}"
             request.set_form_data({"module_item[published]"=>true})
             
             response = http.request(request)
