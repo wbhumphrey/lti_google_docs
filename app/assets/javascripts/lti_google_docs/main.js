@@ -17,6 +17,67 @@ app.config(['$routeProvider', '$sceProvider', function($routeProvider, $sceProvi
     });
 }])
 
+// #### START DIRECTIVES ####
+function draggable(scope, element) {
+    var elem = element[0];
+    elem.draggable = true;
+
+    elem.addEventListener('dragstart', function (e) {
+        e.dataTransfer.effectAllowed = 'copy';
+        e.dataTransfer.setData('Text', this.id);
+        this.classList.add('drag');
+        return false;
+    },
+    false);
+
+    elem.addEventListener('dragend', function (e) {
+        this.classList.remove('drag');
+        return false;
+    }, false);
+}
+
+function droppable() {
+    return {
+        scope: {},
+        link: function (scope, element) {
+            var elem = element[0];
+            
+            elem.addEventListener('dragover', function(e) {
+                e.dataTransfer.dropEffect = 'copy';
+                if(e.preventDefault) e.preventDefault();
+                this.classList.add('over');
+                return false;
+            }, false);
+            
+            elem.addEventListener('dragenter', function(e) {
+                this.classList.add('over');
+                return false;
+            }, false);
+            
+            elem.addEventListener('dragleave', function(e) {
+                this.classList.remove('over');
+                return false;
+            }, false);
+            
+            elem.addEventListener('drop', function(e) {
+                if(e.stopPropagation) e.stopPropagation();
+                
+                this.classList.remove('over');
+                var item = document.getElementById(e.dataTransfer.getData('Text'));
+                this.appendChild(item);
+                
+                return false;
+            }, false);
+
+        }
+    };
+}
+
+app.directive('draggable', function () { return draggable; });
+app.directive('droppable', droppable);
+
+
+// #### END DIRECTIVES ####
 
 
 var c = app.controller('MainCtrl', ['$scope', '$http', function($scope, $http) {
