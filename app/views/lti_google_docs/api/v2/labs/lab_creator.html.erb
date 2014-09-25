@@ -45,46 +45,16 @@
                         <div class="well well-lg container" ng-show="form.participationModel == 'Group'">
                             <div class=" panel panel-default pull-left" tooltip="Students">
                                 <ul droppable>
-                                    
                                     <li id="student-{{student.id}}" ng-repeat="student in students" class="item" draggable>{{student.name}}
-                                    <li id="one-draggable" class="item" draggable>One</li>
-                                    <li id="two-draggable" class="item" draggable>Two</li>
-                                    <li id="three-draggable" class="item" draggable>Three</li>
-                                    <li id="four-draggable" class="item" draggable>Four</li>
                                 </ul>
                             </div>
                             
-                            <div class="pull-right" style="border-style: dotted; border-width: 1px;" tooltip="Drop Students Here">
-                                
-                                
+                            <div class="pull-right" style="border-style: dotted; border-width: 1px;" tooltip="Drop Students Here">           
                                 <div class="panel panel-default" ng-repeat="group in groups">
-                                    <div class="panel-heading">Generated Group {{group.id}}</div>
+                                    <div class="panel-heading">Dyad {{group.id}}</div>
                                     <div class="panel-body" droppable></div>
                                 </div>
-                                
-                                <div class="panel panel-default" >
-                                    <div class="panel-heading">Group 1</div>
-                                    <div class="panel-body" droppable></div>
-                                
-                                </div>
-                                
-                                <div class="panel panel-default" >
-                                    <div class="panel-heading">Group 2</div>
-                                    <div class="panel-body" droppable></div>
-                                
-                                </div>
-                                
-                                <div class="panel panel-default" >
-                                    <div class="panel-heading">Group 3</div>
-                                    <div class="panel-body" droppable></div>
-                                
-                                </div>
-                                
-                                <div class="panel panel-default" >
-                                    <div class="panel-heading">Group 4</div>
-                                    <div class="panel-body" droppable></div>
-                                
-                                </div>
+    
                             </div>
                         </div>
 

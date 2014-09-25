@@ -287,7 +287,7 @@ app.controller('FactoryCtrl', ['$scope', '$http', '$modal', '$location', functio
                 $scope.groups = [];
                 
                 for(var i = 0; i < number_of_dyads; i++) {
-                    $scope.groups.push({id: i});
+                    $scope.groups.push({id: (i+1)});
                 }
                 
                 
