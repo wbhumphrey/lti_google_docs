@@ -41,7 +41,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+                        <br/>
                         <div class="well well-lg container" ng-show="form.participationModel == 'Group'">
                             <div class=" panel panel-default pull-left" tooltip="Students">
                                 <ul droppable>
@@ -51,13 +51,13 @@
                                 </ul>
                             </div>
                             
-                            <div class="pull-right" droppable style="border-style: dotted; border-width: 1px;">
-                            Drag Here.
+                            <div class="pull-right" style="border-style: dotted; border-width: 1px;" tooltip="Drop Students Here">
+                                <div class="panel panel-default" droppable>
+                                    <div class="panel-heading">Group 1</div>
+                                    <div class="panel-body"></div>
+                                
+                                </div>
                             </div>
-                            
-                            
-                        
-                            
                         </div>
 
                         <button type="button" class="btn btn-lg btn-success pull-right" ng-click="createLab()">Create Lab!</button>
