@@ -42,7 +42,23 @@
                             </div>
                         </div>
                         
-                        <div class="well well-lg" ng-show="form.participationModel == 'Group'">Groups Go Here</div>
+                        <div class="well well-lg" ng-show="form.participationModel == 'Group'">
+                            <div class=" panel panel-default pull-left">
+                                <ul>
+                                    <li id="one-draggable" class="item" draggable>One</li>
+                                    <li id="two-draggable" class="item" draggable>Two</li>
+                                    <li id="three-draggable" class="item" draggable>Three</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="pull-right" droppable>
+                            Drag Here.
+                            </div>
+                            
+                            
+                        
+                            
+                        </div>
 
                         <button type="button" class="btn btn-lg btn-success pull-right" ng-click="createLab()">Create Lab!</button>
                     </div>
