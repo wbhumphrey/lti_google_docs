@@ -42,16 +42,16 @@
                             </div>
                         </div>
                         
-                        <div class="well well-lg" ng-show="form.participationModel == 'Group'">
-                            <div class=" panel panel-default pull-left">
-                                <ul>
+                        <div class="well well-lg container" ng-show="form.participationModel == 'Group'">
+                            <div class=" panel panel-default pull-left" tooltip="Students">
+                                <ul droppable>
                                     <li id="one-draggable" class="item" draggable>One</li>
                                     <li id="two-draggable" class="item" draggable>Two</li>
                                     <li id="three-draggable" class="item" draggable>Three</li>
                                 </ul>
                             </div>
                             
-                            <div class="pull-right" droppable>
+                            <div class="pull-right" droppable style="border-style: dotted; border-width: 1px;">
                             Drag Here.
                             </div>
                             
