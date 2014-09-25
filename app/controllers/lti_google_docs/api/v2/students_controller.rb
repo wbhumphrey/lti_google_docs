@@ -30,7 +30,7 @@ module LtiGoogleDocs::Api::V2
             
             # create canvas client from lti_client
             canvas_client = new_canvas_client(lti_client, request)
-            canvas_client.access_token = lti_user.canvas_access_token
+            canvas_client.access_token = u.canvas_access_token
             
             #list students enrolled in this course from Canvas
             resulting_students = canvas_client.list_students_in_course(lti_course.canvas_course_id)
