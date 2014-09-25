@@ -278,7 +278,7 @@ app.controller('FactoryCtrl', ['$scope', '$http', '$modal', '$location', functio
         });
 
         
-        $http.get('/lti_google_docs/api/v2/courses/'+$scope.course_id+"/students", headers: {"LTI_API_TOKEN": $scope.api_token})
+        $http.get('/lti_google_docs/api/v2/courses/'+$scope.course_id+"/students", {headers: {"LTI_API_TOKEN": $scope.api_token}})
             .success(function(data, status, headers, config) {
                 console.log("SUCCESSFUL STUDENT RETRIEVAL");
                 console.log(data);
