@@ -25,7 +25,7 @@ module LtiGoogleDocs::Api::V2
             puts "RETRIEVING LIST OF ENROLLED STUDENTS FROM CANVAS"
             
             lti_course_id = params[:course_id]
-            lti_course = Course.find_by(id: course_id)
+            lti_course = Course.find_by(id: lti_course_id)
             lti_client = Client.find_by(id: lti_course.client_id)
             
             # create canvas client from lti_client
