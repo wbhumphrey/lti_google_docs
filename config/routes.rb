@@ -58,6 +58,8 @@ LtiGoogleDocs::Engine.routes.draw do
                 resources :labs, shallow: true
                 
                 post 'labs/new', to: 'labs#new'
+                get 'students', to: 'students#index'
+                
             end
 
             resources :labs do

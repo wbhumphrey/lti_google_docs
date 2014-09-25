@@ -382,7 +382,7 @@ module LtiGoogleDocs::Api::V2
                 end
             end
         end
-        
+    
         def validate_google_access_token(user)
             if is_google_access_token_valid?(user.google_access_token)
                 #token is valid
