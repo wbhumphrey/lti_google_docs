@@ -282,6 +282,15 @@ app.controller('FactoryCtrl', ['$scope', '$http', '$modal', '$location', functio
             .success(function(data, status, headers, config) {
                 console.log("SUCCESSFUL STUDENT RETRIEVAL");
                 console.log(data);
+                $scope.students = data;
+                var number_of_dyads = Math.ceil(data.length/2);
+                $scope.groups = [];
+                
+                for(var i = 0; i < number_of_dyads; i++) {
+                    $scope.groups.push({id: i});
+                }
+                
+                
             })
             .error(function(data, status, headers, config) {
                 console.log("ERROR RETRIEVING STUDENTS!");
