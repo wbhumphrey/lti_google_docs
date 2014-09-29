@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140922203751) do
+ActiveRecord::Schema.define(version: 20140929211603) do
 
   create_table "canvas_tools", force: true do |t|
     t.text     "labid"
@@ -39,6 +39,24 @@ ActiveRecord::Schema.define(version: 20140922203751) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "canvas_module_id"
+  end
+
+  create_table "group_members", force: true do |t|
+    t.string   "lti_user_id"
+    t.string   "lti_group_id"
+    t.string   "canvas_user_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "groups", force: true do |t|
+    t.string   "lti_course_id"
+    t.string   "lti_lab_id"
+    t.string   "name"
+    t.string   "lti_lab_instance"
+    t.string   "canvas_group_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   create_table "lab_instances", force: true do |t|
