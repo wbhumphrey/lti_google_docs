@@ -152,7 +152,7 @@ module LtiGoogleDocs::Api::V2
                 if lab.participation == 'Group'
                     # get groups from canvas
                     puts "RETRIEVING CANVAS GROUPS FROM CANVAS COURSE: #{lti_course.canvas_course_id}"
-                    canvas_groups = canvas_client.list_groups_in_course(lti_course.canvas_course_id)
+                    canvas_groups = JSON.parse(canvas_client.list_groups_in_course(lti_course.canvas_course_id))
                     puts canvas_groups
                     puts "TYPE OF CLASS FOR canvas_groups: #{canvas_groups.class}"
                     # FOR EVERY CANVAS GROUP
