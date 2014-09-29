@@ -59,6 +59,7 @@ LtiGoogleDocs::Engine.routes.draw do
                 
                 post 'labs/new', to: 'labs#new'
                 get 'students', to: 'students#index'
+                get 'dyads', to: 'students#dyads'
                 
             end
 

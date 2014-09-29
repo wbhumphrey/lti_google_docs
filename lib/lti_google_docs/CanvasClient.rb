@@ -69,6 +69,44 @@ module LtiGoogleDocs
             JSON.parse(response.body)
         end
 
+        def list_groups_in_course(course_id)
+            uri = URI.parse("https://#{canvas_url}/api/v1/courses/#{course_id}/groups")
+            http = Net::HTTP.new(uri.host, uri.port)
+            http.use_ssl = true
+            request = Net::HTTP::Get.new(uri.request_uri)
+            
+            request["Authorization"] = "Bearer #{@access_token}"
+            response = http.request(request)
+            puts "LISTED GROUPS IN COURSE: #{course_id}"
+            puts response.body
+            
+            if response.body["errors"]
+                puts "AN ERROR OCCURRED DURING COURSE GROUP LISTING!"
+            end
+            return response.body
+        end
+        
+        def list_members_in_group(group_id)
+            uri = URI.parse("https://#{@canvas_url}/api/v1/groups/#{group_id}/memberships")
+            http = Net::HTTP.new(uri.host, uri.port)
+            http.use_ssl = true
+            
+            request = Net::HTTP.Get.new(uri.request_uri)
+            
+            request["Authorization"] = "Bearer #{@access_token}"
+            response = http.request(request)
+            puts "LISTED MEMBERS IN GROUP: #{group_id}"
+            puts response.body
+            
+            if response.body["errors"]
+                puts "AN ERROR OCCURRED DURING GROUP MEMBERSHIP LISTING!"
+            end
+            return response.body
+        end
+         
+        
+        
+        
         def add_tool_to_course(course, tool_name, tool_url)
             add_tool_to_course_with_credentials(course, tool_name, tool_url, "test", "secret")
         end

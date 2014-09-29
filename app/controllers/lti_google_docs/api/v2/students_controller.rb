@@ -40,6 +40,12 @@ module LtiGoogleDocs::Api::V2
             
         end
     
+        def dyads
+        
+            #TODO
+        end
+        
+        
         def new_canvas_client(client, request)
             cc = LtiGoogleDocs::CanvasClient.new(client.canvas_url)
             cc.client_id = client.canvas_clientid
