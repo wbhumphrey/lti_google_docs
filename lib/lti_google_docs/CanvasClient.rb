@@ -70,7 +70,7 @@ module LtiGoogleDocs
         end
 
         def list_groups_in_course(course_id)
-            uri = URI.parse("https://#{canvas_url}/api/v1/courses/#{course_id}/groups")
+            uri = URI.parse("https://#{@canvas_url}/api/v1/courses/#{course_id}/groups")
             http = Net::HTTP.new(uri.host, uri.port)
             http.use_ssl = true
             request = Net::HTTP::Get.new(uri.request_uri)
