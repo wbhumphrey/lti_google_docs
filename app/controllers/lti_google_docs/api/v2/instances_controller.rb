@@ -26,8 +26,6 @@ module LtiGoogleDocs::Api::V2
         end
         
         def create
-            puts params.inspect
-            
             api_token = request.headers["HTTP_LTI_API_TOKEN"]
             if !api_token
                 puts 'Missing API token in LTI_API_TOKEN header'
@@ -47,124 +45,202 @@ module LtiGoogleDocs::Api::V2
             lab_id = params[:lab_id]
             result = {}
             
-            if lab_id
-                lab = Lab.find_by(id: lab_id)
-                puts lab.inspect
-                if !lab
-                    puts "NO LAB FOUND FOR ID: #{lab_id}"
-                    render json: result
+            if !lab_id
+                puts "NO IDEA HOW WE GOT HERE"
+                render json: {error: "Missing lab_id parameter."}.to_json, status: :bad_request
+                return
+            end
+
+            lab = Lab.find_by(id: lab_id)
+            puts lab.inspect
+            if !lab
+                puts "NO LAB FOUND FOR ID: #{lab_id}"
+                render json: result
+                return
+            end
+
+            course = Course.find_by(id: lab.course_id)
+            if !course
+                puts "ERROR FINDING COURSE WITH ID: #{lab.course_id}"
+                render json: {error: 'No course could be found for lab'}.to_json, status: :bad_request
+                return
+            end
+
+            client = Client.find_by(id: course.client_id)
+            if !client
+                puts "ERROR FINDING CLIENT WITH ID: #{course.client_id}"
+                render json: {error: 'No client could be found for course'}.to_json, status: :bad_request
+                return
+            end
+
+            #retrieve students enrolled in course
+            puts "RETRIEVING STUDENTS ENROLLED IN COURSE"
+            canvas_client = new_canvas_client(client)
+            canvas_client.access_token = u.canvas_access_token
+            lti_course_id = lab.course_id
+            lti_course = Course.find_by(id: lti_course_id)
+            students = canvas_client.list_students_in_course(lti_course.canvas_course_id)
+
+            puts "STUDENTS RETRIEVED, INSPECTING..."
+            puts students.inspect
+
+            #retrieve lab instances
+            instances = LabInstance.where(labid: lab_id)
+
+            # are there existing lab instances?
+            if !instances.blank?
+                render json: {students: student, instances: instances}.to_json
+                return
+            end
+
+            # are there any students?
+            if students.blank?
+                # no students enrolled in course
+                puts "NO STUDENTS ENROLLED IN COURSE!"
+                render json: [].to_json
+                return
+            end
+            
+            #there are no lab instances associated with this lab, ergo we need to create them
+            #possibility that there are students enrolled in the course
+            
+            if !students.kind_of?(Array)
+                
+                if students["status"] == "unauthenticated"
+                    render json: {error: "Cannot complete request. Unable to authenticate user with Canvas."}.to_json, status: :bad_request
                     return
                 end
                 
-                course = Course.find_by(id: lab.course_id)
-                if !course
-                    puts "ERROR FINDING COURSE WITH ID: #{lab.course_id}"
-                    render json: {error: 'No course could be found for lab'}.to_json, status: :bad_request
-                    return
-                end
-                
-                client = Client.find_by(id: course.client_id)
-                if !client
-                    puts "ERROR FINDING CLIENT WITH ID: #{course.client_id}"
-                    render json: {error: 'No client could be found for course'}.to_json, status: :bad_request
-                    return
-                end
-                
-                #retrieve students enrolled in course
-                puts "RETRIEVING STUDENTS ENROLLED IN COURSE"
-                canvas_client = new_canvas_client(client)
-                canvas_client.access_token = u.canvas_access_token
-                lti_course_id = lab.course_id
-                lti_course = Course.find_by(id: lti_course_id)
-                students = canvas_client.list_students_in_course(lti_course.canvas_course_id)
-                
-                puts "STUDENTS RETRIEVED, INSPECTING..."
-                puts students.inspect
-                
-                #retrieve lab instances
-                instances = LabInstance.where(labid: lab_id)
-                
-                if instances.blank?
-                    #there are no lab instances associated with this lab, ergo we need to create them
-                    if !students.blank?
-                        #possibility that there are students enrolled in the course
-                        if students.kind_of?(Array)
-                            #we have students, so we know we'll need to be creating some files on their drive account
-                            
-                            #validate our access token from google
-                            validate_google_access_token(u)
-                            
-                            #get id of file to copy, associated with lab
-                            id_of_file_to_copy = lab.folderId
-                            
-                            #get files from folder to be copied
-                            drive = new_drive(client)
-                            files_from_folder_to_be_copied = drive.list_children(id_of_file_to_copy)
-                            
-                            puts files_from_folder_to_be_copied.inspect
-                            
-                            if !files_from_folder_to_be_copied.blank?
-                                #there are files within the folder
-                                puts "NUMBER OF STUDENTS: #{students.size}"
-                                puts "NUMBER OF FILES: #{files_from_folder_to_be_copied.items.size}"
-                                
-                                #for every student enrolled in the course...
-                                students.each do |student|
-                                    title = "#{student['name']} - #{lab.title}"
-                                    
-                                    #create new folder for student
-                                    id_of_new_folder = drive.create_folder(title)
-                                    #share file (or try to)
-                                    drive.share_file(student['id'], u.canvas_user_id, id_of_new_folder)
-                                    
-                                    #now that the folder is created, lets populate it with copied files
-                                
-                                    #for every file we need to copy
-                                    files_from_folder_to_be_copied.items.each do |file|
-                                        #get the meta data of the file
-                                        file_data = drive.get_file_info(file.id)
-                                        #grab the title from the meta data
-                                        file_title = file_data.title
-                                        #actually copy the file
-                                        drive.copy_file(file.id, id_of_new_folder, file_title)
-                                        
-                                        #try to share the file with the student
-                                        drive.share_file(student['id'], u.canvas_user_id, file.id)
-                                    end
-                                    
-                                    #now we can create the lab instance
-                                    lab_instance = LabInstance.create(labid: lab.id, studentid: student['id'], fileid: id_of_new_folder);
-                                end 
-                                
-                                result = {students: students, lab_instances: LabInstance.where(labid: params[:id])}
-                            else
-                                #there are no files in the folder
-                                puts "NO FILES WERE FOUND IN THE SPECIFIED FOLDER: #{lab.folderId}"
-                                result = []
-                                return
-                            end
-                        else
-                            #we have an error message
-                            if results["status"] == "unauthenticated"
-                                render text: "NEEDS AUTHENTICATION!";
-                                return;
-                            end
-                            #TODO handle other error messages
-                            
-                        end
-                    else
-                        #there are no students enrolled in the course
-                        result = []
-                    end
-                else
-                    #there are already lab instances
-                    result = {students: students, instances: instances}
-                end                
-            else
-                puts "NO IDEA HOW WE GOT HERE."
+                render json: {error: "Unidentified error when retrieving students from Canvas."}.to_json, status: :internal_server_error
+                return
             end
             
             
+            if students.kind_of?(Array)
+                #we have students, so we know we'll need to be creating some files on their drive account
+
+                #validate our access token from google
+                validate_google_access_token(u)
+
+                #get id of file to copy, associated with lab
+                id_of_file_to_copy = lab.folderId
+
+                #get files from folder to be copied
+                drive = new_drive(client)
+                files_from_folder_to_be_copied = drive.list_children(id_of_file_to_copy)
+
+                # are there files in the shared folder?
+                if files_from_folder_to_be_copied.blank?
+                    puts "NO FILES WERE FOUND IN THE SPECIFIED FOLDER: #{lab.folderId}"
+                    render json: [].to_json
+                    return
+                end
+                
+                #there are files within the folder
+                puts "NUMBER OF STUDENTS: #{students.size}"
+                puts "NUMBER OF FILES: #{files_from_folder_to_be_copied.items.size}"
+
+                
+                
+                ###we either need to do for every student, or for every group... ###
+                
+                if lab.participation != 'Individual' && lab.participation != 'Group'
+                    render json: {error: 'Participation Not Supported: #{lab.participation}'}.to_json, status: :bad_request
+                    return
+                end
+                
+                if lab.participation == 'Group'
+                    # get groups from canvas
+                    puts "RETRIEVING CANVAS GROUPS FROM CANVAS COURSE: #{lti_course.canvas_course_id}"
+                    canvas_groups = canvas_client.list_groups_in_course(lti_course.canvas_course_id)
+                    
+                    # FOR EVERY CANVAS GROUP
+                    canvas_groups.each do |canvas_group|
+                        puts "- FOUND GROUP: #{canvas_group.name}"
+                        # create lti_group 
+                        puts "- CREATING LTI GROUP!"
+                        lti_group = Group.new(lti_course_id: lti_course_id,
+                                                lti_lab_id: lti_lab_id,
+                                                canvas_group_id: canvas_group.id,
+                                                name: "#{lab.name} #{canvas_group.name}")
+
+                        title = "#{canvas_group.name} - #{lab.title}"
+                        puts "- CREATING NEW FOLDER ON DRIVE: #{title}"
+                        id_of_new_folder = drive.create_folder(title)
+                        
+                        ### FOR EVERY MEMBER IN CANVAS GROUP
+                        puts "- RETRIEVING GROUP MEMBERS!"
+                        canvas_group_members = canvas_client.list_members_in_group(canvas_group.id)
+                        canvas_group_members.each do |canvas_group_member|
+                            puts "- - FOUND GROUP MEMBER: #{canvas_group_member.user_id}"
+                            # create group membership model
+                            group_member_lti_user = User.find_by(canvas_user_id: canvas_group_member.user_id)
+                            puts "- - CREATING LTI GroupMember!"
+                            lti_group_member = GroupMember.create(lti_user_id: ?,lti_group_id: lti_group.id, canvas_user_id: group_member.user_id)
+
+                            puts "- - SHARING NEWLY CREATED FOLDER ON DRIVE"
+                            # share copy of folder
+                            #                to                         , from              , folder
+                            drive.share_file(group_member_lti_user.id, u.id, id_of_new_folder)
+
+                            puts "- - COPYING FILES FROM TEMPLATE INTO NEWLY CREATED FOLDER ON DRIVE"
+                            # share copies of all files in folder
+                            files_from_folder_to_be_copied.items.each do |file|
+                                file_data = drive.get_file_info(file.id)
+                                file_title = file_data.title
+                                puts "- - - COPYING #{file_title}"
+                                drive.copy_file(file.id, id_of_new_folder, file_title)
+
+                                puts "- - - SHARING COPIED FILE WITH GROUP MEMBER"
+                                drive.share_file(group_member_lti_user.id, u.id, id_of_new_file)
+                            end
+                        end
+
+                        lti_lab_instance = LabInstance.create(labid: lab.id, studentid: lti_group.id, fileid: id_of_new_folder)
+                        lti_group.lab_instance = lti_lab_instance
+                        lti_group.save
+                        # 
+                    end
+                
+                    result = {students: student, lab_instances: LabInstances.where(labid: params[:id])}
+                    
+                elsif lab.participation == 'Individual'
+
+                    #for every student enrolled in the course...
+                    students.each do |student|
+                        title = "#{student['name']} - #{lab.title}"
+
+                        #create new folder for student
+                        id_of_new_folder = drive.create_folder(title)
+                        #share file (or try to)
+                        drive.share_file(student['id'], u.canvas_user_id, id_of_new_folder)
+
+                        #now that the folder is created, lets populate it with copied files
+
+                        #for every file we need to copy
+                        files_from_folder_to_be_copied.items.each do |file|
+                            #get the meta data of the file
+                            file_data = drive.get_file_info(file.id)
+                            #grab the title from the meta data
+                            file_title = file_data.title
+                            #actually copy the file
+                            drive.copy_file(file.id, id_of_new_folder, file_title)
+
+                            
+                            lti_student = User.find_by(id: student['id'])
+                            #try to share the file with the student
+                            drive.share_file(lti_student.id, u.id, file.id)
+                        end
+
+                        #now we can create the lab instance
+                        lab_instance = LabInstance.create(labid: lab.id, studentid: student['id'], fileid: id_of_new_folder);
+                    end 
+
+                    result = {students: students, lab_instances: LabInstance.where(labid: params[:id])}
+                end
+                
+            end
+
             render json: result.to_json
         end
         

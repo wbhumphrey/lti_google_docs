@@ -175,28 +175,29 @@ module LtiGoogleDocs
             end
         end
 
-        def share_file(to, from, fileid)
+        def share_file(lti_user_id, from_lti_user_id, fileid)
             #Get id of user we're sharing to -> should be in result["id"]
-            student_id = to
             #Get user from id
-            student = User.find_by(id: student_id)
-            if student
+            lti_user = User.find_by(id: lti_user_id)
+            if lti_user
                 #if user exists...get email
-               if student.email 
+               if lti_user.email 
                     #if email exists, do share
-                   share_file_on_drive(fileid, student.email)
+                   share_file_on_drive(fileid, lti_user.email)
                 else
                     #if email does not exist, send message via conversation
-                   puts "STUDENT #{student_id} HAS NOT LOGGED IN YET...ADDING REQUEST TO TABLE...SENDING MESSAGE"
-                   ShareRequests.create(creator: from, for: student_id, file_id: fileid)
-                    @canvas_client.start_conversation(student_id, 'One or more files have been shared with you on Google Drive. Please log in to MU Labs to view.')
+                   puts "LTI USER #{lti_user_id} HAS NOT LOGGED INTO LTI YET...ADDING REQUEST TO TABLE...SENDING MESSAGE"
+                   ShareRequests.create(creator: from_lti_user_id, for: lti_user_id, file_id: fileid)
+                    @canvas_client.start_conversation(lti_user.canvas_user_id, 'One or more files have been shared with you on Google Drive. Please log in to MU Labs to view.')
 
                 end
             else
                  #if user does not exist, add to ShareRequests table
-                puts "STUDENT: #{student_id} DOES NOT EXIST...ADDING REQUEST TO TABLE...SENDING MESSAGE."
-                ShareRequests.create(creator: from, for: student_id, file_id: fileid)
-                @canvas_client.start_conversation(student_id, 'One or more files have been shared with you on Google Drive. Please log in to MU Labs to view.')
+                #TODO: rethink ShareRequests table, currently does not make sense. If there is no User for lti_user_id, then it doesn't
+                #make sense to record it here.
+                puts "LTI USER: #{lti_user_id} DOES NOT EXIST...ADDING REQUEST TO TABLE...SENDING MESSAGE."
+                ShareRequests.create(creator: from_lti_user_id, for: lti_user_id, file_id: fileid)
+                @canvas_client.start_conversation(lti_user.canvas_user_id, 'One or more files have been shared with you on Google Drive. Please log in to MU Labs to view.')
             end
         end
         
