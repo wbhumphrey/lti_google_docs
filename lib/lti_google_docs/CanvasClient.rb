@@ -91,7 +91,7 @@ module LtiGoogleDocs
             http = Net::HTTP.new(uri.host, uri.port)
             http.use_ssl = true
             
-            request = Net::HTTP.Get.new(uri.request_uri)
+            request = Net::HTTP::Get.new(uri.request_uri)
             
             request["Authorization"] = "Bearer #{@access_token}"
             response = http.request(request)
