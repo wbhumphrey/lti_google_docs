@@ -221,7 +221,7 @@ module LtiGoogleDocs::Api::V2
                         # 
                     end
                 
-                    result = {students: students, lab_instances: LabInstances.where(labid: params[:id])}
+                    result = {students: students, lab_instances: LabInstance.where(labid: params[:id])}
                     
                 elsif lab.participation == 'Individual'
 
