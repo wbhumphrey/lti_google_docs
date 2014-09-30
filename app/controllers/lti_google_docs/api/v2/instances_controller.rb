@@ -169,6 +169,21 @@ module LtiGoogleDocs::Api::V2
                         puts "- CREATING NEW FOLDER ON DRIVE: #{title}"
                         id_of_new_folder = drive.create_folder(title)
                         
+                        newly_copied_file_ids = []
+                        puts "- COPYING FILES FROM TEMPLATE INTO NEWLY CREATED FOLDER ON DRIVE"
+                        # share copies of all files in folder
+                        files_from_folder_to_be_copied.items.each do |file|
+                            file_data = drive.get_file_info(file.id)
+                            file_title = file_data.title
+
+                            puts "- - - COPYING #{file_title}"
+                            copy_file_result = drive.copy_file(file.id, id_of_new_folder, file_title);
+                            id_of_new_file = copy_file_result["id"]
+
+                            ### PUT IDs OF COPIED FILES IN ARRAY SO WE CAN SHARE THEM LATER ###
+                            newly_copied_file_ids.push(id_of_new_file)
+                        end
+            
                         ### FOR EVERY MEMBER IN CANVAS GROUP
                         puts "- RETRIEVING GROUP MEMBERS!"
                         canvas_group_members = JSON.parse(canvas_client.list_members_in_group(canvas_group['id']))
@@ -185,23 +200,16 @@ module LtiGoogleDocs::Api::V2
                 
             
                             puts "- - CREATING LTI GroupMember!"
-                            lti_group_member = GroupMember.create(lti_user_id: group_member_lti_user.id,lti_group_id: lti_group.id, canvas_user_id: canvas_group_member['user_id'])
+                            lti_group_member = GroupMember.create(lti_user_id: group_member_lti_user.id,
+                                                                 lti_group_id: lti_group.id,
+                                                                 canvas_user_id: canvas_group_member['user_id'])
 
                             puts "- - SHARING NEWLY CREATED FOLDER ON DRIVE"
                             # share copy of folder
                             #                to                         , from              , folder
                             drive.share_file(group_member_lti_user.id, u.id, id_of_new_folder)
-
-                            puts "- - COPYING FILES FROM TEMPLATE INTO NEWLY CREATED FOLDER ON DRIVE"
-                            # share copies of all files in folder
-                            files_from_folder_to_be_copied.items.each do |file|
-                                file_data = drive.get_file_info(file.id)
-                                file_title = file_data.title
-                                
-                                puts "- - - COPYING #{file_title}"
-                                copy_file_result = drive.copy_file(file.id, id_of_new_folder, file_title);
-                                id_of_new_file = copy_file_result["id"]
-                                
+                            newly_copied_file_ids.each do |id_of_new_file|                 
+            
                                 puts "- - - SHARING COPIED FILE WITH GROUP MEMBER"
                                 drive.share_file(group_member_lti_user.id, u.id, id_of_new_file)
                             end
