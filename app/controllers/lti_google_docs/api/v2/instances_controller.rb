@@ -176,8 +176,16 @@ module LtiGoogleDocs::Api::V2
                             puts "- - FOUND GROUP MEMBER: #{canvas_group_member['user_id']}"
                             # create group membership model
                             group_member_lti_user = User.find_by(canvas_user_id: canvas_group_member['user_id'])
+                            if !group_member_lti_user
+                                # no User was found for that canvas_user_id ...this person has not logged in yet?
+                                puts "- - NO EXISTING USER FOUND FOR CANVAS USER: #{canvas_group_member['user_id']}...CREATING ONE!"
+                                group_member_lti_user = User.create(canvas_user_id: canvas_group_member['user_id'])
+                                
+                            end
+                
+            
                             puts "- - CREATING LTI GroupMember!"
-                            lti_group_member = GroupMember.create(lti_user_id: group_member_lti_user,lti_group_id: lti_group.id, canvas_user_id: canvas_group_member['user_id'])
+                            lti_group_member = GroupMember.create(lti_user_id: group_member_lti_user.id,lti_group_id: lti_group.id, canvas_user_id: canvas_group_member['user_id'])
 
                             puts "- - SHARING NEWLY CREATED FOLDER ON DRIVE"
                             # share copy of folder
