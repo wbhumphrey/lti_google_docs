@@ -140,8 +140,6 @@ module LtiGoogleDocs::Api::V2
                 puts "NUMBER OF STUDENTS: #{students.size}"
                 puts "NUMBER OF FILES: #{files_from_folder_to_be_copied.items.size}"
 
-                
-                
                 ###we either need to do for every student, or for every group... ###
                 
                 if lab.participation != 'Individual' && lab.participation != 'Group'
@@ -221,7 +219,7 @@ module LtiGoogleDocs::Api::V2
                         # 
                     end
                 
-                    result = {students: students, lab_instances: LabInstance.where(labid: params[:id])}
+                    result = {students: students, lab_instances: LabInstance.where(labid: lab.id)}
                     
                 elsif lab.participation == 'Individual'
 
