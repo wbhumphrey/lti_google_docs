@@ -161,7 +161,7 @@ module LtiGoogleDocs::Api::V2
                         # create lti_group 
                         puts "- CREATING LTI GROUP!"
                         lti_group = Group.new(lti_course_id: lti_course_id,
-                                                lti_lab_id: lti_lab_id,
+                                                lti_lab_id: lab_id,
                                                 canvas_group_id: canvas_group['id'],
                                                 name: "#{lab.name} #{canvas_group['name']}")
 
