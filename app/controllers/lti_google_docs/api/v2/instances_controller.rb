@@ -165,13 +165,13 @@ module LtiGoogleDocs::Api::V2
                                                 canvas_group_id: canvas_group['id'],
                                                 name: "#{lab.title} #{canvas_group['name']}")
 
-                        title = "#{canvas_group.name} - #{lab.title}"
+                        title = "#{canvas_group['name']} - #{lab.title}"
                         puts "- CREATING NEW FOLDER ON DRIVE: #{title}"
                         id_of_new_folder = drive.create_folder(title)
                         
                         ### FOR EVERY MEMBER IN CANVAS GROUP
                         puts "- RETRIEVING GROUP MEMBERS!"
-                        canvas_group_members = JSON.parse(canvas_client.list_members_in_group(canvas_group.id))
+                        canvas_group_members = JSON.parse(canvas_client.list_members_in_group(canvas_group['id']))
                         canvas_group_members.each do |canvas_group_member|
                             puts "- - FOUND GROUP MEMBER: #{canvas_group_member['user_id']}"
                             # create group membership model
