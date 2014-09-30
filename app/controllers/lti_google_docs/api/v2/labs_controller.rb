@@ -333,12 +333,40 @@ module LtiGoogleDocs::Api::V2
                 # if i am not a student
                 if !tool_provider.student?
             
-                    # retrieve all students names
-                    #show instructor/designer view
-                    @api_token = generateToken
-                    u.api_token = @api_token
-                    u.save
-                    render "designer_lab"
+                    lab_instance = LabInstance.find_by(labid: @lab_id, studentid: student_id)
+                    if lab.participation == 'Group'
+                        lab_group = Group.find_by(lti_lab_id: lab.id)
+                        student_id = lab_group.id
+                        
+                        lab_instance = LabInstance.find_by(labid: @lab_id, participation: 'Group', studentid: student_id)
+                        if !lab_instance
+                            puts "NO LAB INSTANCE FOUND FOR GROUP WITH ID: #{student_id}"
+                            render text: "No Group Lab found. Please let your teacher know."
+                            return
+                        end
+                    end
+
+                    if lab_instance
+                    # validate google token
+                        validate_google_access_token(User.find_by(canvas_user_id: student_id))
+                    # retrieve shared_folder_id from labinstance
+                        shared_folder_id = lab_instance.fileid
+                    # retrieve list of files from shared folder
+                        drive = new_drive(client)
+                        shared_files_json = drive.list_children(shared_folder_id)
+                    # generate object via JSON.generate from list of files (as json)
+                    # put generated object in cookie with key 'shared_files'
+                        cookies["shared_files"] = JSON.generate(shared_files_json)
+                    # show 'student_lab'
+                        
+                        
+                        @api_token = generateToken
+                        u.api_token = @api_token
+                        u.save
+                        render "designer_lab"
+                    end
+                    #no lab instance?
+                    
                 # if i AM a student
                 else
                     # retrieve lab instance with this id and my student_id
