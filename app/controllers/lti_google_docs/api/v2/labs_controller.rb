@@ -343,6 +343,20 @@ module LtiGoogleDocs::Api::V2
                 else
                     # retrieve lab instance with this id and my student_id
                     lab_instance = LabInstance.find_by(labid: @lab_id, studentid: student_id)
+                    if lab.participation == 'Group'
+                        lab_group = Group.find_by(lti_lab_id: lab.id)
+                        student_id = lab_group.id
+                        
+                        lab_instance = LabInstance.find_by(labid: @lab_id, participation: 'Group', studentid: student_id)
+                        if !lab_instance
+                            puts "NO LAB INSTANCE FOUND FOR GROUP WITH ID: #{student_id}"
+                            render text: "No Group Lab found. Please let your teacher know."
+                            return
+                        end
+                    end
+                    
+                    
+                    
                     if lab_instance
                     # validate google token
                         validate_google_access_token(User.find_by(canvas_user_id: student_id))
