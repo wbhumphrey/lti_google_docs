@@ -198,7 +198,7 @@ module LtiGoogleDocs::Api::V2
                                 file_data = drive.get_file_info(file.id)
                                 file_title = file_data.title
                                 puts "- - - COPYING #{file_title}"
-                                copy_file_result = JSON.parse(drive.copy_file(file.id, id_of_new_folder, file_title));
+                                copy_file_result = drive.copy_file(file.id, id_of_new_folder, file_title);
                                 puts copy_file_result.inspect
                                 
                                 id_of_new_file = copy_file_result["id"]
