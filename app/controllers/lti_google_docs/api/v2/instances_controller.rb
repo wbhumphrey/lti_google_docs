@@ -198,8 +198,10 @@ module LtiGoogleDocs::Api::V2
                                 file_data = drive.get_file_info(file.id)
                                 file_title = file_data.title
                                 puts "- - - COPYING #{file_title}"
-                                drive.copy_file(file.id, id_of_new_folder, file_title)
-
+                                copy_file_result = JSON.parse(drive.copy_file(file.id, id_of_new_folder, file_title));
+                                puts copy_file_result.inspect
+                                
+                                id_of_new_file = copy_file_result["id"]
                                 puts "- - - SHARING COPIED FILE WITH GROUP MEMBER"
                                 drive.share_file(group_member_lti_user.id, u.id, id_of_new_file)
                             end
