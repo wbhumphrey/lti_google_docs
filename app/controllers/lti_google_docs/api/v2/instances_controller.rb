@@ -157,13 +157,13 @@ module LtiGoogleDocs::Api::V2
                     puts "TYPE OF CLASS FOR canvas_groups: #{canvas_groups.class}"
                     # FOR EVERY CANVAS GROUP
                     canvas_groups.each do |canvas_group|
-                        puts "- FOUND GROUP: #{canvas_group.name}"
+                        puts "- FOUND GROUP: #{canvas_group['name']}"
                         # create lti_group 
                         puts "- CREATING LTI GROUP!"
                         lti_group = Group.new(lti_course_id: lti_course_id,
                                                 lti_lab_id: lti_lab_id,
-                                                canvas_group_id: canvas_group.id,
-                                                name: "#{lab.name} #{canvas_group.name}")
+                                                canvas_group_id: canvas_group['id'],
+                                                name: "#{lab.name} #{canvas_group['name']}")
 
                         title = "#{canvas_group.name} - #{lab.title}"
                         puts "- CREATING NEW FOLDER ON DRIVE: #{title}"
@@ -171,11 +171,11 @@ module LtiGoogleDocs::Api::V2
                         
                         ### FOR EVERY MEMBER IN CANVAS GROUP
                         puts "- RETRIEVING GROUP MEMBERS!"
-                        canvas_group_members = canvas_client.list_members_in_group(canvas_group.id)
+                        canvas_group_members = JSON.parse(canvas_client.list_members_in_group(canvas_group.id))
                         canvas_group_members.each do |canvas_group_member|
-                            puts "- - FOUND GROUP MEMBER: #{canvas_group_member.user_id}"
+                            puts "- - FOUND GROUP MEMBER: #{canvas_group_member['user_id']}"
                             # create group membership model
-                            group_member_lti_user = User.find_by(canvas_user_id: canvas_group_member.user_id)
+                            group_member_lti_user = User.find_by(canvas_user_id: canvas_group_member['user_id'])
                             puts "- - CREATING LTI GroupMember!"
                             lti_group_member = GroupMember.create(lti_user_id: group_member_lti_user,lti_group_id: lti_group.id, canvas_user_id: group_member.user_id)
 
