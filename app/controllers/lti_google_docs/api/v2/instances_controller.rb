@@ -177,7 +177,7 @@ module LtiGoogleDocs::Api::V2
                             # create group membership model
                             group_member_lti_user = User.find_by(canvas_user_id: canvas_group_member['user_id'])
                             puts "- - CREATING LTI GroupMember!"
-                            lti_group_member = GroupMember.create(lti_user_id: group_member_lti_user,lti_group_id: lti_group.id, canvas_user_id: group_member.user_id)
+                            lti_group_member = GroupMember.create(lti_user_id: group_member_lti_user,lti_group_id: lti_group.id, canvas_user_id: canvas_group_member['user_id'])
 
                             puts "- - SHARING NEWLY CREATED FOLDER ON DRIVE"
                             # share copy of folder
