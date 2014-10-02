@@ -336,6 +336,12 @@ module LtiGoogleDocs::Api::V2
                     # retrieve all the groups for this lab
                     groups = Group.where(lti_lab_id: @lab_id)
                     
+                    if !tool_provider.student?
+                        render "designer_group_lab"
+                        return
+                    end
+                    
+                    
                     #for every group for this lab
                     groups.each do |group|
                         
