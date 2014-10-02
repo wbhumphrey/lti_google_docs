@@ -327,37 +327,59 @@ module LtiGoogleDocs::Api::V2
             client = Client.find_by(id: course.client_id)
             
             
+                
+            
+            
+            
+            
             instances = LabInstance.where(labid: @lab_id)
             # if any lab instance with this lab id exists...
             if !instances.blank?
+                
+                
+                
+                
+                # if and only if this is a group lab
+                if (lab.participation == 'Group')
+                    
+                    # retrieve all the groups for this lab
+                    groups = Group.where(lti_lab_id: @lab_id)
+                    
+                    #for every group for this lab
+                    groups.each do |group|
+                        
+                        #retrieve a membership entry matching this lab and this canvas user id
+                        membership = GroupMember.find_by(lti_group_id: group.id, canvas_user_id: params[:custom_canvas_user_id])
+                        
+                        # if the membership exists, we have a winner
+                        if membership
+                            lab_instance = LabInstance.find_by(id: group.lti_lab_instance)
+                        end
+                        
+                        #if not, continue;
+                    end
+                else
+                    lab_instance = LabInstance.find_by(labid: @lab_id, studentid: params[:custom_canvas_userid])
+                end
+                
+                # so now we have the proper lab_instance
+                
+                
                 # if i am not a student
                 if !tool_provider.student?
-            
-                    lab_instance = LabInstance.find_by(labid: @lab_id, studentid: student_id)
-                    if lab.participation == 'Group'
-                        lab_group = Group.find_by(lti_lab_id: lab.id)
-                        student_id = lab_group.id
-                        
-                        lab_instance = LabInstance.find_by(labid: @lab_id, participation: 'Group', studentid: student_id)
-                        if !lab_instance
-                            puts "NO LAB INSTANCE FOUND FOR GROUP WITH ID: #{student_id}"
-                            render text: "No Group Lab found. Please let your teacher know."
-                            return
-                        end
-                    end
 
                     if lab_instance
-                    # validate google token
+                        # validate google token
                         validate_google_access_token(User.find_by(canvas_user_id: student_id))
-                    # retrieve shared_folder_id from labinstance
+                        # retrieve shared_folder_id from labinstance
                         shared_folder_id = lab_instance.fileid
-                    # retrieve list of files from shared folder
+                        # retrieve list of files from shared folder
                         drive = new_drive(client)
                         shared_files_json = drive.list_children(shared_folder_id)
-                    # generate object via JSON.generate from list of files (as json)
-                    # put generated object in cookie with key 'shared_files'
+                        # generate object via JSON.generate from list of files (as json)
+                        # put generated object in cookie with key 'shared_files'
                         cookies["shared_files"] = JSON.generate(shared_files_json)
-                    # show 'student_lab'
+                        # show 'student_lab'
                         
                         
                         @api_token = generateToken
@@ -369,36 +391,19 @@ module LtiGoogleDocs::Api::V2
                     
                 # if i AM a student
                 else
-                    # retrieve lab instance with this id and my student_id
-                    lab_instance = LabInstance.find_by(labid: @lab_id, studentid: student_id)
-                    if lab.participation == 'Group'
-                        lab_group = Group.find_by(lti_lab_id: lab.id)
-                        student_id = lab_group.id
-                        
-                        lab_instance = LabInstance.find_by(labid: @lab_id, participation: 'Group', studentid: student_id)
-                        if !lab_instance
-                            puts "NO LAB INSTANCE FOUND FOR GROUP WITH ID: #{student_id}"
-                            render text: "No Group Lab found. Please let your teacher know."
-                            return
-                        end
-                    end
-                    
-                    
-                    
                     if lab_instance
-                    # validate google token
+                        # validate google token
                         validate_google_access_token(User.find_by(canvas_user_id: student_id))
-                    # retrieve shared_folder_id from labinstance
+                        # retrieve shared_folder_id from labinstance
                         shared_folder_id = lab_instance.fileid
-                    # retrieve list of files from shared folder
+                        # retrieve list of files from shared folder
                         drive = new_drive(client)
                         shared_files_json = drive.list_children(shared_folder_id)
-                    # generate object via JSON.generate from list of files (as json)
-                    # put generated object in cookie with key 'shared_files'
+                        # generate object via JSON.generate from list of files (as json)
+                        # put generated object in cookie with key 'shared_files'
                         cookies["shared_files"] = JSON.generate(shared_files_json)
-                    # show 'student_lab'
                         
-                        
+                        # show 'student_lab' 
                         @api_token = generateToken
                         u.api_token = @api_token
                         u.save
