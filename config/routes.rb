@@ -66,7 +66,7 @@ LtiGoogleDocs::Engine.routes.draw do
             resources :labs do
                 resources :instances, shallow: true
                 post 'launch', to: 'labs#launch'
-                get 'groups', to: 'labs#groups'
+                get 'groups', to: 'labs#groups', on: :member
             end
 
             resources :instances

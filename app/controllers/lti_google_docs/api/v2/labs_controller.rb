@@ -436,6 +436,33 @@ module LtiGoogleDocs::Api::V2
             end
         end
     
+        # GET from AJAX request
+        def groups
+
+            if !params[:id]
+                render json: {error: 'No ID present'}, status: :bad_request
+                return
+            end
+    
+            groups_dto = []
+            lti_groups = Group.where(lti_lab_id: params[:id])
+            lti_groups.each do |lti_group|
+                students_dto = []
+                lti_group_members = GroupMember.where(lti_group_id: lti_group.id) 
+                lti_group_members.each do |member|
+                    u = User.find_by(member.lti_user_id)
+                    if u
+                        students_dto.push(u.vemail)
+                    end
+                end
+                groups_dto.push(students_dto)
+            end
+    
+    
+            render json: {groups: groups_dto}.to_json
+            return
+        end
+    
         def validate_google_access_token(user)
             if is_google_access_token_valid?(user.google_access_token)
                 #token is valid
