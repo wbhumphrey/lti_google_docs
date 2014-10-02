@@ -3,7 +3,7 @@ module LtiGoogleDocs
         
         def initialize(options = {})
             puts "INSIDE GOOGLE DRIVE CLIENT"
-            puts options.inspect
+            #puts options.inspect
             
             @google_client = options[:google_client]
             @canvas_client = options[:canvas_client]

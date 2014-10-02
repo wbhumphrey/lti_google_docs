@@ -158,11 +158,12 @@ module LtiGoogleDocs::Api::V2
                         puts "- FOUND GROUP: #{canvas_group['name']}"
                         # create lti_group 
                         puts "- CREATING LTI GROUP!"
-                        lti_group = Group.new(lti_course_id: lti_course_id,
+                        lti_group = Group.create(lti_course_id: lti_course_id,
                                                 lti_lab_id: lab_id,
                                                 canvas_group_id: canvas_group['id'],
                                                 name: "#{lab.title} #{canvas_group['name']}")
 
+                        puts "- NEW LTI GROUP ID: #{lti_group.id}"
                         title = "#{canvas_group['name']} - #{lab.title}"
                         puts "- CREATING NEW FOLDER ON DRIVE: #{title}"
                         id_of_new_folder = drive.create_folder(title)
@@ -215,7 +216,7 @@ module LtiGoogleDocs::Api::V2
 
                         lti_lab_instance = LabInstance.create(labid: lab.id, studentid: lti_group.id, fileid: id_of_new_folder)
                         lti_group.lti_lab_instance = lti_lab_instance
-                        lti_group.save
+                        lti_group.update
                         # 
                     end
                 
