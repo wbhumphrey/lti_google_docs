@@ -323,6 +323,7 @@ module LtiGoogleDocs::Api::V2
                 puts "CONTINUE WITH LAB AS NORMAL...";
             end
             lab = Lab.find_by(id: @lab_id)
+            @lab = lab
             course = Course.find_by(id: lab.course_id)
             client = Client.find_by(id: course.client_id)
 
