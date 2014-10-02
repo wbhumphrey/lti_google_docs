@@ -30,7 +30,7 @@ module LtiGoogleDocs
 
             if result.status == 200
                 puts "FOLDER CREATION SEEMED TO WORK OKAY"
-                puts result.data.inspect
+                #puts result.data.inspect
                 return result.data.id
             else
                 puts "SOMETHING HAPPENED WITH FOLDER CREATION"
@@ -67,7 +67,8 @@ module LtiGoogleDocs
                 puts "FILE COPY SEEMED TO WORK OKAY"
                 return result.data
             else
-                puts "SOMETHING WENT WRONG WHEN COPYING FILE"
+                puts "SOMETHING WENT WRONG WHEN COPYING FILE: #{result.status}"
+                puts result.inspect
                 return -1
             end
 
@@ -222,7 +223,7 @@ module LtiGoogleDocs
                 return []
             else
                 puts "(#{result.status}) SUCCESSFUL LISTING"
-                puts result.body.inspect
+                #puts result.body.inspect
                 return result.data
             end
         end
