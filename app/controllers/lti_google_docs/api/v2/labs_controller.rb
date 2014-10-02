@@ -305,7 +305,16 @@ module LtiGoogleDocs::Api::V2
                 if !tool_provider.student?
                     @need_canvas_token = true
                 end
-            else 
+            else
+                if !u.refresh || u.refresh == "" || u.refresh == nil
+                    
+                    @need_google_token = true
+                    lti_client = Client.find_by(client_id: params[:oauth_consumer_key])
+                    @canvas_clientid = lti_client.canvas_clientid
+                    render "retrieve_resource_tokens"
+                    return
+                end
+                
                 validate_google_access_token(u)
                 @need_google_token = !u.google_access_token
                 @need_canvas_token = false
