@@ -322,8 +322,14 @@ module LtiGoogleDocs::Api::V2
             else
                 puts "CONTINUE WITH LAB AS NORMAL...";
             end
+            
             lab = Lab.find_by(id: @lab_id)
-            @lab = lab
+            if !lab
+                render text: "NO LAB FOUND. LOOK AT OUTPUT TO FIND ERROR!"
+                return
+            end
+            @lab = Lab.find_by(id: @lab_id)
+            
             course = Course.find_by(id: lab.course_id)
             client = Client.find_by(id: course.client_id)
 
