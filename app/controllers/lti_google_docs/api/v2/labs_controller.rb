@@ -461,7 +461,7 @@ module LtiGoogleDocs::Api::V2
                 lti_group_members.each do |member|
                     u = User.find_by(member.lti_user_id)
                     if u
-                        students_dto.push(u.email)
+                        students_dto.push({id: member.id, email: u.email})
                     end
                 end
                 
