@@ -653,3 +653,7 @@ app.controller('RetrieveResourceTokensCtrl', ['$scope', '$window', function($sco
         }
     };              
 }]);
+                    
+app.controller('DesignerGroupLabCtrl', ['$scope', '$http', '$cookies', function($scope, $http, $cookies) {
+    $scope.groups = [{name: 'Fake Group 1', link: 'https://fake.link.com/?document=woah!', students: [{email: 'woah@dude.com'}]}];
+}]);
