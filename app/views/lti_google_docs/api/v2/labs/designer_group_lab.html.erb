@@ -1,0 +1,29 @@
+<div ng-app="LTI_GOOGLE_DOCS">
+    <div ng-controller="DesignerGroupLabCtrl">
+        Lab Info: <%=@lab.title%>, <%=@lab.folderName%>,
+        <hr/>
+        
+        
+        <accordion>        
+            <accordion-group ng-repeat="group in groups">
+                <accordion-heading>
+                    {{group.name}}
+                </accordion-heading>
+                
+                Lab: {{group.link}}
+                
+                
+                <table class="table table-bordered table-hover">
+                    <tr>
+                        <th>Student</th> <th>Last Accessed</th>
+                    </tr>
+                    
+                    <tr ng-repeat="studnet in group.students">
+                        <td>Student.email</td><td> - </td>
+                    </tr>
+                </table>
+            </accordion-group>
+        </accordion>
+        
+    </div>
+</div>
