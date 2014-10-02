@@ -350,14 +350,30 @@ module LtiGoogleDocs::Api::V2
                     
                     
                     #for every group for this lab
+                    puts "- FOR EVERY GROUP IN LAB: #{@lab_id}"
                     groups.each do |group|
                         
                         #retrieve a membership entry matching this lab and this canvas user id
                         membership = GroupMember.find_by(lti_group_id: group.id, canvas_user_id: params[:custom_canvas_user_id])
-                        
+                        puts "- - MEMBER FOUND? #{membership.id}"
                         # if the membership exists, we have a winner
                         if membership
+                            puts "- - MEMBER FOUND!"
                             lab_instance = LabInstance.find_by(id: group.lti_lab_instance)
+                            puts "- - LAB INSTANCE FOUND? #{lab_instance.id}"
+                            
+                            if lab_instance
+                                puts "- - LAB INSTANCE FOUND!"
+                            else 
+                                puts "- - LAB INSTANCE NOT FOUND! TRYING TO FIND BY GROUP ID"
+                                lab_instance = LabInstance.find_by(studentid: group.id)
+                                if lab_instance
+                                    puts "- - LAB INSTANCE FOUND! #{lab_instance.id}"
+                                else
+                                    puts "- - NO LAB INSTANCE FOUND. WHAT TO DO NOW? ERROR?"
+                                end
+                            end
+                            
                         end
                         
                         #if not, continue;
