@@ -334,6 +334,7 @@ module LtiGoogleDocs::Api::V2
             client = Client.find_by(id: course.client_id)
 
             instances = LabInstance.where(labid: @lab_id)
+            lab_instance = nil
             # if any lab instance with this lab id exists...
             if !instances.blank?
                 puts "THERE ARE LAB INSTANCES"
