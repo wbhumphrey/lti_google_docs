@@ -467,7 +467,19 @@ module LtiGoogleDocs::Api::V2
                 
                 lab = Lab.find_by(id: params[:id])
                 lab_instance = LabInstance.find_by(labid: lab.id, studentid: lti_group.id)
-                groups_dto.push({name: lti_group.name, students: students_dto, link: lab_instance.fileid})
+                
+                puts "- Retrieving file IDs from Google in folderid: #{lab_instance.fileid}"
+                course = Course.find_by(lti_group.lti_course_id)
+                client = Client.find)
+                drive = new_drive(Client.find_by(id: course.client_id))
+                files_in_folder = drive.list_children(lab_instance.fileid)
+                
+                files_dto = []
+                files_in_folder.items.each do |file|
+                    files_dto.push(file["id"])
+                end
+                
+                groups_dto.push({name: lti_group.name, students: students_dto, link: lab_instance.fileid, fileIDs: files_dto})
             end
     
     
