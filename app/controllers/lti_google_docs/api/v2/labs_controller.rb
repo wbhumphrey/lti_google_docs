@@ -446,13 +446,15 @@ module LtiGoogleDocs::Api::V2
     
             groups_dto = []
             lti_groups = Group.where(lti_lab_id: params[:id])
+            puts "- FOUND #{lti_groups.size} groups"
             lti_groups.each do |lti_group|
                 students_dto = []
                 lti_group_members = GroupMember.where(lti_group_id: lti_group.id) 
+                puts "- - FOUND #{lti_group_members.size} group members"
                 lti_group_members.each do |member|
                     u = User.find_by(member.lti_user_id)
                     if u
-                        students_dto.push(u.vemail)
+                        students_dto.push(u.email)
                     end
                 end
                 groups_dto.push(students_dto)
