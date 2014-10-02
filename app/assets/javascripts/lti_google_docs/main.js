@@ -656,4 +656,18 @@ app.controller('RetrieveResourceTokensCtrl', ['$scope', '$window', function($sco
                     
 app.controller('DesignerGroupLabCtrl', ['$scope', '$http', '$cookies', function($scope, $http, $cookies) {
     $scope.groups = [{name: 'Fake Group 1', link: 'https://fake.link.com/?document=woah!', students: [{email: 'woah@dude.com'}]}];
+                    
+    var lab_id = angular.element("#lab-id").val();
+    console.log("FOUND LAB ID: "+lab_id)
+                    
+    $http.get('/lti_google_docs/api/v2/labs/'+lab_id+'/groups')
+            .success(function(data, status, headers, config) {
+                console.log("SUCCESSFUL GROUP RETRIEVAL!");
+                console.log(data);
+                $scope.groups = data;
+            })
+            .error(function(data, status, headers, config) {
+                console.log("("+status+") ERROR RETRIEVING GROUPS!");
+                console.log(data);
+            });
 }]);
