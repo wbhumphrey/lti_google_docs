@@ -470,8 +470,8 @@ module LtiGoogleDocs::Api::V2
                 
                 puts "- Retrieving file IDs from Google in folderid: #{lab_instance.fileid}"
                 course = Course.find_by(lti_group.lti_course_id)
-                client = Client.find)
-                drive = new_drive(Client.find_by(id: course.client_id))
+                client = Client.find_by(id: course.client_id)
+                drive = new_drive(client)
                 files_in_folder = drive.list_children(lab_instance.fileid)
                 
                 files_dto = []
