@@ -12,8 +12,11 @@
                     {{group.name}}
                 </accordion-heading>
                 
-                Lab: <a href="https://docs.google.com/document/d/{{group.link}}/edit">Go To Drive View</a>
                 
+                Lab Files:
+                <div ng-repeat="file in group.fileIDs">
+                    <a href="https://docs.google.com/document/d/{{file}}/edit">Go To Drive View</a>
+                </div>
                 
                 <table class="table table-bordered table-hover">
                     <tr>
