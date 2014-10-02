@@ -215,8 +215,8 @@ module LtiGoogleDocs::Api::V2
                         end
 
                         lti_lab_instance = LabInstance.create(labid: lab.id, studentid: lti_group.id, fileid: id_of_new_folder)
-                        lti_group.lti_lab_instance = lti_lab_instance
-                        lti_group.update
+#                        lti_group.lti_lab_instance = lti_lab_instance
+                        lti_group.update(lti_lab_instance: lti_lab_instance.id)
                         # 
                     end
                 
