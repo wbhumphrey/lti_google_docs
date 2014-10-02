@@ -1,5 +1,5 @@
 <div ng-app="LTI_GOOGLE_DOCS">
-    <div ng-controller="DesignerGroupLabCtrl">
+    <div id="google-lti-body" class="container" ng-controller="DesignerGroupLabCtrl">
         Lab Info: <%=@lab.title%>, <%=@lab.folderName%>,
         <hr/>
         
@@ -18,8 +18,8 @@
                         <th>Student</th> <th>Last Accessed</th>
                     </tr>
                     
-                    <tr ng-repeat="studnet in group.students">
-                        <td>Student.email</td><td> - </td>
+                    <tr ng-repeat="student in group.students">
+                        <td>student.email</td><td> - </td>
                     </tr>
                 </table>
             </accordion-group>
