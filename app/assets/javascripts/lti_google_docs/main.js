@@ -658,9 +658,11 @@ app.controller('DesignerGroupLabCtrl', ['$scope', '$http', '$cookies', function(
     $scope.groups = [{name: 'Fake Group 1', link: 'https://fake.link.com/?document=woah!', students: [{email: 'woah@dude.com'}]}];
                     
     var lab_id = angular.element("#lab-id").val();
+    $scope.api_token = angular.element("#api-token").val();
     console.log("FOUND LAB ID: "+lab_id)
+    console.log("FOUND TOKEN: "+$scope.api_token)
                     
-    $http.get('/lti_google_docs/api/v2/labs/'+lab_id+'/groups')
+    $http.get('/lti_google_docs/api/v2/labs/'+lab_id+'/groups', {headers: {"LTI_API_TOKEN": $scope.api_token}})
             .success(function(data, status, headers, config) {
                 console.log("SUCCESSFUL GROUP RETRIEVAL!");
                 console.log(data);

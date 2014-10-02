@@ -1,6 +1,7 @@
 <div ng-app="LTI_GOOGLE_DOCS">
     <div id="google-lti-body" class="container" ng-controller="DesignerGroupLabCtrl">
         <input type="hidden" id="lab-id" value="<%=@lab.id%>">
+        <input type="hidden" id="api-token" value="<%=@api_token%>">
         Lab Info: <%=@lab.title%>, <%=@lab.folderName%>,
         <hr/>
         

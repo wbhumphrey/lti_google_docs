@@ -315,7 +315,7 @@ module LtiGoogleDocs::Api::V2
                     @need_canvas_token = !u.canvas_access_token
                 end
             end
-        
+            @api_token = u.api_token
             if @need_google_token || @need_canvas_token
                 render "retrieve_resource_tokens"
                 return;
@@ -445,7 +445,21 @@ module LtiGoogleDocs::Api::V2
     
         # GET from AJAX request
         def groups
-
+            api_token = request.headers["HTTP_LTI_API_TOKEN"]
+            if !api_token
+                render json: {error: 'Missing API token in LTI_API_TOKEN header'}.to_json, status: :bad_request
+                return
+            end
+            
+            u = User.find_by(api_token: api_token)
+            if !u
+                render json: {error: 'Invalid API token'}.to_json, status: :bad_request
+                return
+            end
+            
+            #TODO: check user variable to see if api_token has expired
+            
+            
             if !params[:id]
                 render json: {error: 'No ID present'}, status: :bad_request
                 return
@@ -468,6 +482,8 @@ module LtiGoogleDocs::Api::V2
                 lab = Lab.find_by(id: params[:id])
                 lab_instance = LabInstance.find_by(labid: lab.id, studentid: lti_group.id)
                 
+                puts "- Validating Google Access token"
+                validate_google_access_token(u)
                 puts "- Retrieving file IDs from Google in folderid: #{lab_instance.fileid}"
                 course = Course.find_by(lti_group.lti_course_id)
                 client = Client.find_by(id: course.client_id)
