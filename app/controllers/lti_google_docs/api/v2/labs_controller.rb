@@ -471,7 +471,7 @@ module LtiGoogleDocs::Api::V2
             end
     
     
-            render json: {groups: groups_dto}.to_json
+            render json: groups_dto.to_json
             return
         end
     
