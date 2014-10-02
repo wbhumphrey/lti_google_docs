@@ -467,7 +467,7 @@ module LtiGoogleDocs::Api::V2
                 
                 lab = Lab.find_by(id: params[:id])
                 lab_instance = LabInstance.find_by(labid: lab.id, studentid: lti_group.id)
-                groups_dto.push({students: students_dto, link: lab_instance.folderId})
+                groups_dto.push({students: students_dto, link: lab_instance.fileid})
             end
     
     
