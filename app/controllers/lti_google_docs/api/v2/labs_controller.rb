@@ -320,28 +320,19 @@ module LtiGoogleDocs::Api::V2
                 render "retrieve_resource_tokens"
                 return;
             else
-                puts "CONTINUE WITH LAB CREATOR AS NORMAL...";
+                puts "CONTINUE WITH LAB AS NORMAL...";
             end
             lab = Lab.find_by(id: @lab_id)
             course = Course.find_by(id: lab.course_id)
             client = Client.find_by(id: course.client_id)
-            
-            
-                
-            
-            
-            
-            
+
             instances = LabInstance.where(labid: @lab_id)
             # if any lab instance with this lab id exists...
             if !instances.blank?
-                
-                
-                
-                
+                puts "THERE ARE LAB INSTANCES"
                 # if and only if this is a group lab
                 if (lab.participation == 'Group')
-                    
+                    puts "LAB IS A GROUP LAB"
                     # retrieve all the groups for this lab
                     groups = Group.where(lti_lab_id: @lab_id)
                     
@@ -359,16 +350,18 @@ module LtiGoogleDocs::Api::V2
                         #if not, continue;
                     end
                 else
+                    puts "LAB IS AN INDIVIDUAL LAB"
                     lab_instance = LabInstance.find_by(labid: @lab_id, studentid: params[:custom_canvas_userid])
                 end
                 
                 # so now we have the proper lab_instance
-                
+                puts "NOW WE HAVE THE PROPER LAB INSTANCE"
                 
                 # if i am not a student
                 if !tool_provider.student?
-
+                    puts "REQUEST IS NOT FROM A STUDENT"
                     if lab_instance
+                        puts "LAB INSTANCE EXISTS"
                         # validate google token
                         validate_google_access_token(User.find_by(canvas_user_id: student_id))
                         # retrieve shared_folder_id from labinstance
@@ -385,13 +378,16 @@ module LtiGoogleDocs::Api::V2
                         @api_token = generateToken
                         u.api_token = @api_token
                         u.save
+                        puts "RENDER VIEW LAB FOR DESIGNERS"
                         render "designer_lab"
                     end
                     #no lab instance?
-                    
+                    puts "LAB INSTANCE DOES NOT EXIST"
                 # if i AM a student
                 else
+                    puts "REQUEST IS FROM A STUDENT"
                     if lab_instance
+                        puts "LAB INSTANCE EXISTS"
                         # validate google token
                         validate_google_access_token(User.find_by(canvas_user_id: student_id))
                         # retrieve shared_folder_id from labinstance
@@ -410,19 +406,23 @@ module LtiGoogleDocs::Api::V2
                         render "student_lab"
                     else
                         #no lab instance exists for this student. Was the student enrolled after lab creation?
+                        puts "NO LAB INSTANCE EXISTS FOR THE REQUESTER, WERE THEY ENROLLED AFTER THE LAB WAS CREATED?"
                     end
                 end
             else
+                puts "NO LAB INSTANCES EXIST"
             # if no lab instance exists
                 if !tool_provider.student?
                 # if I am not a student
                     #show designer_lab_activation
-                    
+                    puts "REQUESTER IS NOT A STUDENT"
                     @api_token = generateToken
                     u.api_token = @api_token
                     u.save
+                    puts "RENDER LAB ACTIVATION PAGE FOR DESIGNERS"
                     render "designer_lab_activation"
                 else
+                    puts "REQUESTER IS A STUDENT"
                 # if I AM a student
                     #show message to notify instructor that they need to login
                     render text: "Please notify your instructor that they need to login before this lab is activated"
